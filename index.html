@@ -288,6 +288,10 @@ a{color:var(--pine2)}
 .empty i{font-style:normal;display:block;font-size:34px;margin-bottom:10px}
 .sk{background:linear-gradient(90deg,var(--paper2),#fff,var(--paper2));background-size:200% 100%;animation:sk 1.2s linear infinite;border-radius:12px}
 @keyframes sk{to{background-position:-200% 0}}
+/* ---- 登录分段切换 ---- */
+.segtab{display:flex;background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.segtab button{flex:1;height:36px;border-radius:9px;font-size:13.5px;font-weight:800;color:var(--ink2)}
+.segtab button.on{background:var(--card);color:var(--pine);box-shadow:0 1px 0 var(--edge)}
 .foot{margin-top:34px;background:linear-gradient(160deg,#123F30,#08251B);color:#B4CCC1;font-size:12px;line-height:1.85;padding:24px 0 30px}
 .foot b{color:#EAF3EC}
 .foot a{color:#8FD0AE}
@@ -342,1996 +346,7 @@ a{color:var(--pine2)}
 <audio id="bgm" src="assets/audio/bgm.mp3" loop preload="none"></audio>
 
 <!-- 云 SDK 内联：避免外部请求在部分移动端（如 iOS Safari）被拦截/失败 -->
-<script id="wbsdk">
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-var WorkBuddyCloud = (() => {
-  var _a, _b, _c, _d, _e2, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t2, _u, _v, _w, _x, _y, _z, _A, _B, _C, _D, _E, _F, _G, _H;
-  var ne = Object.defineProperty;
-  var Et = Object.getOwnPropertyDescriptor;
-  var xt = Object.getOwnPropertyNames;
-  var kt = Object.prototype.hasOwnProperty;
-  var a = (r, e) => ne(r, "name", { value: e, configurable: true });
-  var vt = (r, e) => {
-    for (var t in e) ne(r, t, { get: e[t], enumerable: true });
-  }, Pt = (r, e, t, s) => {
-    if (e && typeof e == "object" || typeof e == "function") for (let n of xt(e)) !kt.call(r, n) && n !== t && ne(r, n, { get: () => e[n], enumerable: !(s = Et(e, n)) || s.enumerable });
-    return r;
-  };
-  var _t = (r) => Pt(ne({}, "__esModule", { value: true }), r);
-  var Qt = {};
-  vt(Qt, { AuthModule: () => D, CLOUD_MODULE_PATHS: () => A, CLOUD_PATH_PREFIX: () => I, CloudOpenAIError: () => x, CloudStoragePathError: () => b, DEFAULT_SIGNED_URL_TTL_SECONDS: () => pe, LlmModule: () => F, MAX_SIGNED_URL_TTL_SECONDS: () => me, PUBLISHABLE_KEY_HEADER: () => ge, RUNTIME_STORAGE_BUCKET: () => q, WorkBuddyCloudClient: () => re, WorkBuddyCloudConfigError: () => _, WorkBuddyDatabaseModule: () => G, WorkBuddyStorageBucket: () => H, WorkBuddyStorageDownload: () => ee, WorkBuddyStorageModule: () => te, anonymousTokenProvider: () => ie, createMemoryStorage: () => we, createWorkBuddyCloud: () => wt, getModelCapability: () => Pe, getModelDisplayName: () => ve, shouldClearCredentials: () => St });
-  var _ = (_a = class extends Error {
-    constructor(e) {
-      super(e), this.name = "WorkBuddyCloudConfigError";
-    }
-  }, a(_a, "WorkBuddyCloudConfigError"), _a);
-  var Tt = /^wbpk_/;
-  function Ue(r, e) {
-    if (typeof r != "string" || r.trim() === "") throw new _(`${e} is required and must be a non-empty string.`);
-    let t = r.trim(), s;
-    try {
-      s = new URL(t);
-    } catch {
-      throw new _(`${e} must be an absolute URL, received: ${t}`);
-    }
-    if (s.protocol !== "https:" && s.protocol !== "http:") throw new _(`${e} must use http(s), received protocol: ${s.protocol}`);
-    return t.replace(/\/+$/, "");
-  }
-  a(Ue, "normalizeHttpUrl");
-  function Ot(r) {
-    var _a2;
-    if (r != null && r !== "") return Ue(r, "endpoint");
-    let e = (_a2 = globalThis.location) == null ? void 0 : _a2.origin;
-    if (typeof e != "string" || e === "") throw new _("endpoint is required outside browsers (no location.origin to fall back to).");
-    return e.replace(/\/+$/, "");
-  }
-  a(Ot, "resolveEndpoint");
-  function At(r) {
-    if (typeof r != "string" || r.trim() === "") throw new _("publishableKey is required and must be a non-empty string.");
-    let e = r.trim();
-    if (!Tt.test(e)) throw new _('publishableKey must start with "wbpk_".');
-    return e;
-  }
-  a(At, "normalizePublishableKey");
-  function Rt(r) {
-    if (r) return r;
-    if (typeof globalThis.fetch != "function") throw new _("Global fetch is unavailable in this runtime; pass options.fetch explicitly.");
-    return globalThis.fetch.bind(globalThis);
-  }
-  a(Rt, "resolveFetch");
-  function Le(r) {
-    if (!r || typeof r != "object") throw new _("createWorkBuddyCloud requires publishableKey.");
-    return Object.freeze({ endpoint: Ot(r.endpoint), oauthRelayBaseUrl: r.oauthRelayBaseUrl ? Ue(r.oauthRelayBaseUrl, "oauthRelayBaseUrl") : "", publishableKey: At(r.publishableKey), fetch: Rt(r.fetch) });
-  }
-  a(Le, "resolveRuntimeConfig");
-  var ge = "x-wb-webapp-access-key";
-  function ye(r, e) {
-    return async (t, s) => {
-      let n = new Headers(s == null ? void 0 : s.headers);
-      if (n.set(ge, r.publishableKey), !n.has("Authorization")) {
-        let i = await e();
-        i && n.set("Authorization", `Bearer ${i}`);
-      }
-      return r.fetch(t, { ...s, headers: n });
-    };
-  }
-  a(ye, "createCloudFetch");
-  var ie = a(() => Promise.resolve(void 0), "anonymousTokenProvider");
-  var I = "/.cloud", A = Object.freeze({ auth: `${I}/auth`, database: `${I}/database/rest`, storage: `${I}/storage`, llm: `${I}/llm` });
-  var $t = "workbuddy-cloud.pkce.workbuddy.", Ut = "workbuddy-cloud.pkce-done.workbuddy.";
-  function Ce(r) {
-    let e = "";
-    for (let t of r) e += String.fromCharCode(t);
-    return btoa(e).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  }
-  a(Ce, "base64UrlEncode");
-  function Ie() {
-    var _a2;
-    let r = globalThis.crypto;
-    return typeof (r == null ? void 0 : r.getRandomValues) == "function" && typeof ((_a2 = r == null ? void 0 : r.subtle) == null ? void 0 : _a2.digest) == "function" && typeof globalThis.btoa == "function";
-  }
-  a(Ie, "hasWebCrypto");
-  function je() {
-    let r = new Uint8Array(32);
-    return globalThis.crypto.getRandomValues(r), Ce(r);
-  }
-  a(je, "createCodeVerifier");
-  async function De(r) {
-    let e = new TextEncoder().encode(r), t = await globalThis.crypto.subtle.digest("SHA-256", e);
-    return Ce(new Uint8Array(t));
-  }
-  a(De, "computeS256Challenge");
-  var oe = (_b = class {
-    constructor(e) {
-      __publicField(this, "verifierKey");
-      __publicField(this, "consumedKey");
-      this.verifierKey = $t + e, this.consumedKey = Ut + e;
-    }
-    usable() {
-      let e = this.storage();
-      if (!e) return false;
-      try {
-        let t = `${this.verifierKey}.probe`;
-        return e.setItem(t, "1"), e.removeItem(t), true;
-      } catch {
-        return false;
-      }
-    }
-    saveVerifier(e) {
-      try {
-        let t = this.storage();
-        return t ? (t.setItem(this.verifierKey, e), t.removeItem(this.consumedKey), true) : false;
-      } catch {
-        return false;
-      }
-    }
-    readVerifier() {
-      var _a2, _b2;
-      try {
-        return (_b2 = (_a2 = this.storage()) == null ? void 0 : _a2.getItem(this.verifierKey)) != null ? _b2 : null;
-      } catch {
-        return null;
-      }
-    }
-    clearVerifier() {
-      var _a2;
-      try {
-        (_a2 = this.storage()) == null ? void 0 : _a2.removeItem(this.verifierKey);
-      } catch {
-      }
-    }
-    markConsumed(e) {
-      var _a2;
-      try {
-        (_a2 = this.storage()) == null ? void 0 : _a2.setItem(this.consumedKey, e);
-      } catch {
-      }
-    }
-    isConsumed(e) {
-      var _a2;
-      try {
-        return !!e && ((_a2 = this.storage()) == null ? void 0 : _a2.getItem(this.consumedKey)) === e;
-      } catch {
-        return false;
-      }
-    }
-    storage() {
-      var _a2;
-      try {
-        return (_a2 = globalThis.sessionStorage) != null ? _a2 : null;
-      } catch {
-        return null;
-      }
-    }
-  }, a(_b, "WorkBuddyPkceStore"), _b);
-  var w = { signUp: "/v1/signup", signIn: "/v1/signin", signInWithProvider: "/v1/signin/with/provider", token: "/v1/token", loginWechat: "/v1/login-wechat", loginWechatWeb: "/v1/login-wechat-web", loginWorkBuddy: "/v1/login-workbuddy", signOut: "/v1/user/signout", userMe: "/v1/user/me", verification: "/v1/verification", verificationVerify: "/v1/verification/verify", resetPassword: "/v1/reset", sudo: "/v1/user/sudo", userPassword: "/v1/user/password" };
-  function be(r, e) {
-    let t = r != null ? r : {}, s = typeof t.access_token == "string" ? t.access_token : "";
-    if (!s) throw It("response has no access_token");
-    let n = typeof t.refresh_token == "string" ? t.refresh_token : "", i = typeof t.expires_in == "number" ? t.expires_in : 0;
-    return { accessToken: s, refreshToken: n, expiresAt: e + i * 1e3, user: Lt(t) };
-  }
-  a(be, "parseSession");
-  function Lt(r) {
-    let e = r.is_anonymous === true;
-    return { id: typeof r.sub == "string" ? r.sub : "", name: T(r.name), avatarUrl: T(r.avatar_url), isAnonymous: e, raw: r };
-  }
-  a(Lt, "userFromSessionPayload");
-  function Ne(r) {
-    var _a2, _b2, _c2;
-    let e = r != null ? r : {}, t = typeof e.sub == "string" ? e.sub : typeof e.uid == "string" ? e.uid : "", s = (_a2 = e.user_metadata) != null ? _a2 : {};
-    return { id: t, email: (_b2 = T(e.email)) != null ? _b2 : T(s.email), phone: (_c2 = T(e.phone_number)) != null ? _c2 : T(e.phone), name: T(e.name), avatarUrl: T(e.avatar_url), isAnonymous: e.is_anonymous === true || e.scope === "anonymous", raw: e };
-  }
-  a(Ne, "parseUser");
-  function T(r) {
-    return typeof r == "string" && r !== "" ? r : void 0;
-  }
-  a(T, "pickString");
-  function Fe(r, e) {
-    var _a2, _b2, _c2;
-    let t = e != null ? e : {}, s = typeof t.error == "string" ? t.error : void 0, n = (_c2 = (_b2 = (_a2 = T(t.error_description)) != null ? _a2 : T(t.message)) != null ? _b2 : T(t.msg)) != null ? _c2 : `HTTP ${r}`;
-    return { kind: Ct(r, s), message: n, status: r, code: s, cause: e };
-  }
-  a(Fe, "normalizeHttpError");
-  function Ct(r, e) {
-    if (e === "invalid_grant") return "unauthenticated";
-    switch (r) {
-      case 400:
-        return "invalid-request";
-      case 401:
-        return "unauthenticated";
-      case 403:
-        return "permission-denied";
-      case 404:
-        return "not-found";
-      case 429:
-        return "rate-limited";
-      case 501:
-        return "unimplemented";
-      case 503:
-        return "backend-unavailable";
-      default:
-        return r >= 500 ? "backend-unavailable" : "unknown";
-    }
-  }
-  a(Ct, "errorKind");
-  function W(r) {
-    return { kind: "network", message: `request failed before a response was received: ${r instanceof Error ? r.message : String(r)}`, status: 0, cause: r };
-  }
-  a(W, "normalizeNetworkError");
-  function It(r) {
-    let e = new Error(`workbuddy-cloud auth: ${r}`);
-    return e.kind = "unknown", e.status = 0, e;
-  }
-  a(It, "sessionShapeError");
-  var ae = (_c = class {
-    constructor(e) {
-      __publicField(this, "store");
-      __publicField(this, "refresh");
-      __publicField(this, "emit");
-      __publicField(this, "isCredentialsRejected");
-      __publicField(this, "now");
-      __publicField(this, "inflight", null);
-      __publicField(this, "signOutEpoch", 0);
-      __publicField(this, "lastFailure", null);
-      var _a2;
-      this.store = e.store, this.refresh = e.refresh, this.emit = e.emit, this.isCredentialsRejected = e.isCredentialsRejected, this.now = (_a2 = e.now) != null ? _a2 : Date.now;
-    }
-    peek() {
-      return this.store.read();
-    }
-    async ensure() {
-      let e = this.store.read();
-      return e ? this.isExpiring(e) ? e.refreshToken ? this.refreshOnce(e) : this.abandon() : e : null;
-    }
-    async forceRefresh() {
-      let e = this.store.read();
-      return (e == null ? void 0 : e.refreshToken) ? this.refreshOnce(e, { ignoreCooldown: true }) : null;
-    }
-    commitSignIn(e) {
-      return this.lastFailure = null, this.store.write(e), this.emit("SIGNED_IN", e), e;
-    }
-    commitUserUpdate(e) {
-      return this.store.write(e), this.emit("USER_UPDATED", e), e;
-    }
-    clear() {
-      this.signOutEpoch += 1, this.lastFailure = null, this.inflight = null, this.store.clear(), this.emit("SIGNED_OUT", null);
-    }
-    isExpiring(e) {
-      return typeof e.expiresAt != "number" ? true : e.expiresAt - this.now() < 9e4;
-    }
-    refreshOnce(e, t = {}) {
-      if (this.inflight) return this.inflight;
-      if (!t.ignoreCooldown && this.inCooldown(e.refreshToken)) return Promise.resolve(null);
-      let s = this.doRefresh(e).finally(() => {
-        this.inflight = null;
-      });
-      return this.inflight = s, s;
-    }
-    inCooldown(e) {
-      let t = this.lastFailure;
-      return t !== null && t.token === e && this.now() - t.at < 6e4;
-    }
-    async doRefresh(e) {
-      let t = this.signOutEpoch, s = e.refreshToken, n;
-      try {
-        n = await this.refresh(s);
-      } catch (o) {
-        return this.onRefreshFailed(s, o);
-      }
-      if (this.signOutEpoch !== t) return this.store.clear(), null;
-      let i = this.store.read();
-      return i && i.refreshToken !== s ? i : (this.lastFailure = null, this.store.write(n), this.emit("TOKEN_REFRESHED", n), n);
-    }
-    onRefreshFailed(e, t) {
-      return this.isCredentialsRejected(t) ? this.abandon() : (this.lastFailure = { token: e, at: this.now() }, null);
-    }
-    abandon() {
-      return this.store.clear(), this.lastFailure = null, this.emit("SIGNED_OUT", null), null;
-    }
-  }, a(_c, "SessionManager"), _c);
-  var jt = "workbuddy-cloud.session.";
-  function we() {
-    let r = /* @__PURE__ */ new Map();
-    return { getItem: a((e) => {
-      var _a2;
-      return (_a2 = r.get(e)) != null ? _a2 : null;
-    }, "getItem"), setItem: a((e, t) => {
-      r.set(e, t);
-    }, "setItem"), removeItem: a((e) => {
-      r.delete(e);
-    }, "removeItem") };
-  }
-  a(we, "createMemoryStorage");
-  function Be(r) {
-    if (r) return r;
-    try {
-      let e = "__workbuddy_probe__";
-      return globalThis.localStorage.setItem(e, "1"), globalThis.localStorage.removeItem(e), globalThis.localStorage;
-    } catch {
-      return we();
-    }
-  }
-  a(Be, "resolveStorage");
-  var ce = (_d = class {
-    constructor(e, t) {
-      __publicField(this, "storage");
-      __publicField(this, "key");
-      this.storage = e, this.key = jt + t;
-    }
-    read() {
-      let e;
-      try {
-        e = this.storage.getItem(this.key);
-      } catch {
-        return null;
-      }
-      if (!e) return null;
-      try {
-        let t = JSON.parse(e);
-        return Dt(t) ? t : this.discard();
-      } catch {
-        return this.discard();
-      }
-    }
-    write(e) {
-      try {
-        this.storage.setItem(this.key, JSON.stringify(e));
-      } catch {
-      }
-    }
-    clear() {
-      try {
-        this.storage.removeItem(this.key);
-      } catch {
-      }
-    }
-    discard() {
-      return this.clear(), null;
-    }
-  }, a(_d, "SessionStore"), _d);
-  function Dt(r) {
-    if (!r || typeof r != "object") return false;
-    let e = r;
-    return typeof e.accessToken == "string" && e.accessToken !== "" && typeof e.refreshToken == "string" && typeof e.expiresAt == "number" && !!e.user && typeof e.user == "object";
-  }
-  a(Dt, "isStoredSession");
-  function j(r, e) {
-    var _a2, _b2;
-    let t = (_a2 = r.email) != null ? _a2 : "", s = (_b2 = r.phone) != null ? _b2 : "";
-    return !!t == !!s ? { data: null, error: { kind: "invalid-request", message: `${e} requires exactly one of email or phone`, status: 0 } } : { data: t ? { kind: "email", value: t, username: t } : { kind: "phone", value: s, username: Nt(s) }, error: null };
-  }
-  a(j, "resolveAuthIdentifier");
-  function Nt(r) {
-    let t = r.replace(/\D/g, "");
-    return t.startsWith("0086") ? t = t.slice(4) : t.startsWith("86") && t.length === 13 && (t = t.slice(2)), /^1\d{10}$/.test(t) ? `+86 ${t}` : r;
-  }
-  a(Nt, "normalizePhone");
-  var He = 200;
-  function We(r, e) {
-    let t = Array.from(r);
-    return t.length <= e ? r : `${t.slice(0, e).join("")}\u2026`;
-  }
-  a(We, "truncateMessage");
-  function Se(r) {
-    let e = r.get("error");
-    if (!e) return null;
-    let t = r.get("error_description"), s = t ? `oauth provider rejected the request: ${e}: ${t}` : `oauth provider rejected the request: ${e}`;
-    return We(s, He);
-  }
-  a(Se, "oauthProviderRejectMessage");
-  var D = (_e2 = class {
-    constructor(e, t, s = {}) {
-      __publicField(this, "fetch");
-      __publicField(this, "baseUrl");
-      __publicField(this, "sessions");
-      __publicField(this, "storage");
-      __publicField(this, "oauthRelayBaseUrl");
-      __publicField(this, "workBuddyPkce");
-      __publicField(this, "workBuddyExchanges", /* @__PURE__ */ new Map());
-      __publicField(this, "listeners", /* @__PURE__ */ new Map());
-      __publicField(this, "nextListenerId", 1);
-      this.fetch = t, this.baseUrl = `${e.endpoint}${A.auth}`, this.oauthRelayBaseUrl = e.oauthRelayBaseUrl, this.storage = Be(s.storage), this.workBuddyPkce = new oe(e.publishableKey), this.sessions = new ae({ store: new ce(this.storage, e.publishableKey), refresh: a((n) => this.exchangeRefreshHandle(n), "refresh"), emit: a((n, i) => this.notify(n, i), "emit"), isCredentialsRejected: a((n) => ue(n) && Me(n), "isCredentialsRejected") });
-    }
-    async getAccessToken() {
-      var _a2;
-      return (_a2 = await this.sessions.ensure()) == null ? void 0 : _a2.accessToken;
-    }
-    async signInWithPassword(e) {
-      if (!e.password) return h(p("signInWithPassword requires a password"));
-      let t = j(e, "signInWithPassword");
-      return t.error ? h(t.error) : this.postForSession(w.signIn, { username: t.data.username, password: e.password });
-    }
-    async signInWithWechat(e, t) {
-      return e ? t ? this.postForSession(w.loginWechat, { code: e, appid: t }) : h(p("signInWithWechat requires appid")) : h(p("signInWithWechat requires code"));
-    }
-    async signUp(e) {
-      let t = j(e, "signUp");
-      if (t.error) return h(t.error);
-      if (!e.verificationToken) return h(p("signUp requires a verificationToken; run sendOtp + verifyOtp first (the provider rejects username+password-only signup)"));
-      let s = { verification_token: e.verificationToken };
-      return t.data.kind === "phone" ? s.phone_number = t.data.username : s.email = t.data.username, e.password && (s.password = e.password), this.postForSession(w.signUp, s);
-    }
-    async sendOtp(e) {
-      var _a2;
-      let t = j(e, "sendOtp");
-      if (t.error) return h(t.error);
-      let s = {};
-      t.data.kind === "phone" ? (s.phone_number = t.data.username, s.target = "ANY") : (s.email = t.data.username, s.usage = "email", e.emailRedirectTo && (s.email_redirect_to = e.emailRedirectTo));
-      let n = await this.request(w.verification, { method: "POST", body: s });
-      if (n.error) return h(n.error);
-      let i = (_a2 = n.data) != null ? _a2 : {}, o = typeof i.verification_id == "string" ? i.verification_id : "";
-      return o ? S({ verificationId: o, isExistingUser: i.is_user === true }) : h(p("provider returned no verification_id"));
-    }
-    async signInWithOtp(e) {
-      let t = j(e, "signInWithOtp");
-      if (t.error) return h(t.error);
-      let s = await this.sendOtp(e);
-      if (s.error) return h(s.error);
-      let { verificationId: n, isExistingUser: i } = s.data, o = t.data.kind === "phone" ? { phone: t.data.username } : { email: t.data.username };
-      return S({ verificationId: n, isExistingUser: i, isUser: i, verify: a(({ token: c, password: u }) => this.verifyOtp({ verificationId: n, token: c, ...o, isExistingUser: i, password: u }), "verify") });
-    }
-    async verifyOtp(e) {
-      var _a2;
-      let t = j(e, "verifyOtp");
-      if (t.error) return h(t.error);
-      if (!e.verificationId || !e.token) return h(p("verifyOtp requires verificationId and token"));
-      let s = await this.request(w.verificationVerify, { method: "POST", body: { verification_id: e.verificationId, verification_code: e.token } });
-      if (s.error) return h(s.error);
-      let n = (_a2 = s.data) != null ? _a2 : {}, i = typeof n.verification_token == "string" ? n.verification_token : "";
-      if (!i) return h(p("provider returned no verification_token"));
-      if (e.isExistingUser) return this.postForSession(w.signIn, { username: t.data.username, verification_token: i });
-      let o = t.data.kind === "phone" ? { phone: t.data.value, password: e.password } : { email: t.data.value, password: e.password };
-      return this.signUp({ ...o, verificationToken: i });
-    }
-    async signInWithOAuth(e) {
-      var _a2;
-      if (!this.oauthRelayBaseUrl) return h(p("signInWithOAuth requires oauthRelayBaseUrl"));
-      if (e.provider !== "google" && e.provider !== "wechat" && e.provider !== "workbuddy") return h(p("\u5F53\u524D SDK \u4E0D\u652F\u6301\u8BE5\u767B\u5F55\u65B9\u5F0F\uFF0C\u8BF7\u68C0\u67E5 SDK \u7248\u672C\u4E0E\u767B\u5F55\u914D\u7F6E\u3002"));
-      let t = (_a2 = e.redirectTo) != null ? _a2 : Mt();
-      return t ? this.startRelayOAuth(e, t) : h(p("signInWithOAuth requires redirectTo outside a browser environment"));
-    }
-    parseCallbackQuery(e) {
-      try {
-        let t = /^https?:\/\//i.test(e) ? new URL(e).search : e;
-        return S(new URLSearchParams(t));
-      } catch {
-        return h(p("oauth callback URL is invalid"));
-      }
-    }
-    async handleOAuthCallback(e) {
-      var _a2, _b2;
-      let t = this.parseCallbackQuery(e != null ? e : Ee());
-      if (t.error || !t.data) return h((_a2 = t.error) != null ? _a2 : p("oauth callback URL is invalid"));
-      let s = t.data, n = Se(s);
-      if (n) return h({ kind: "unauthenticated", message: n, status: 0 });
-      let i = s.get("code");
-      if (!i) return S(null);
-      let o = (_b2 = s.get("state")) != null ? _b2 : "";
-      if (!o) return h(p("oauth callback requires state"));
-      let c = s.get("provider_id");
-      if (c !== "custom-oauth") return h(p("oauth callback requires provider_id=custom-oauth"));
-      let u = { provider_id: c, provider_code: i, state: o, provider_params: { state: o } };
-      return this.postForSession(w.signInWithProvider, u);
-    }
-    async handleWechatWebCallback(e) {
-      var _a2, _b2;
-      let t = this.parseCallbackQuery(e != null ? e : Ee());
-      if (t.error || !t.data) return h((_a2 = t.error) != null ? _a2 : p("oauth callback URL is invalid"));
-      let s = t.data, n = Se(s);
-      if (n) return h({ kind: "unauthenticated", message: n, status: 0 });
-      let i = s.get("code");
-      if (!i) return S(null);
-      let o = (_b2 = s.get("state")) != null ? _b2 : "";
-      if (!o) return h(p("oauth callback requires state"));
-      let c = s.get("provider");
-      return c && c !== "wechat" ? h(p("wechat callback requires provider=wechat")) : s.get("provider_id") === "custom-oauth" ? h(p("wechat callback must not use provider_id=custom-oauth")) : this.postForSession(w.loginWechatWeb, { code: i, state: o });
-    }
-    async handleWorkBuddyCallback(e) {
-      var _a2, _b2;
-      let t = this.parseCallbackQuery(e != null ? e : Ee());
-      if (t.error || !t.data) return h((_a2 = t.error) != null ? _a2 : p("oauth callback URL is invalid"));
-      let s = t.data, n = s.get("provider");
-      if (n && n !== "workbuddy") return S(null);
-      let i = Se(s);
-      if (i) return this.workBuddyPkce.clearVerifier(), h({ kind: "unauthenticated", message: i, status: 0 });
-      let o = s.get("code");
-      if (!o) return S(null);
-      let c = (_b2 = s.get("state")) != null ? _b2 : "";
-      if (!c) return h(p("workbuddy callback requires state"));
-      if (s.get("provider_id") === "custom-oauth") return h(p("workbuddy callback must not use provider_id=custom-oauth"));
-      if (this.workBuddyPkce.isConsumed(c)) return S(null);
-      let u = this.workBuddyExchanges.get(c);
-      if (u) return u;
-      let d = this.workBuddyPkce.readVerifier();
-      if (!d) return h(p("workbuddy callback has no local PKCE verifier; sign in again in this tab"));
-      this.workBuddyPkce.clearVerifier();
-      let l = this.exchangeWorkBuddyCode(o, c, d);
-      this.workBuddyExchanges.set(c, l);
-      try {
-        return await l;
-      } finally {
-        this.workBuddyExchanges.delete(c);
-      }
-    }
-    async exchangeWorkBuddyCode(e, t, s) {
-      let n = await this.postForSession(w.loginWorkBuddy, { code: e, state: t, code_verifier: s });
-      return n.data && this.workBuddyPkce.markConsumed(t), n;
-    }
-    async resetPasswordForEmail(e) {
-      var _a2;
-      if (!e) return h(p("resetPasswordForEmail requires email"));
-      let t = await this.request(w.verification, { method: "POST", body: { email: e, usage: "PASSWORD_RESET", target: "USER" } });
-      if (t.error) return h(t.error);
-      let s = (_a2 = t.data) != null ? _a2 : {}, n = typeof s.verification_id == "string" ? s.verification_id : "";
-      return n ? S({ updateUser: a(async ({ nonce: i, password: o }) => {
-        var _a3;
-        let c = await this.request(w.verificationVerify, { method: "POST", body: { verification_id: n, verification_code: i } });
-        if (c.error) return h(c.error);
-        let u = (_a3 = c.data) != null ? _a3 : {}, d = typeof u.verification_token == "string" ? u.verification_token : "";
-        if (!d) return h(p("provider returned no verification_token"));
-        let l = await this.request(w.resetPassword, { method: "POST", body: { email: e, new_password: o, verification_token: d } });
-        if (l.error) return h(l.error);
-        let f = await this.signInWithPassword({ email: e, password: o });
-        return f.error || this.notify("PASSWORD_RECOVERY", f.data), f;
-      }, "updateUser") }) : h(p("provider returned no verification_id"));
-    }
-    async resetPasswordForOld(e) {
-      var _a2, _b2;
-      let t = await this.getAccessToken();
-      if (!t) return h({ kind: "unauthenticated", message: "no active session", status: 0 });
-      let s = await this.request(w.sudo, { method: "POST", token: t, body: { password: e.oldPassword } });
-      if (s.error) return h(s.error);
-      let n = (_a2 = s.data) != null ? _a2 : {}, i = typeof n.sudo_token == "string" ? n.sudo_token : "";
-      if (!i) return h(p("provider returned no sudo_token"));
-      let o = await this.request(w.userPassword, { method: "PATCH", token: t, body: { sudo_token: i, new_password: e.newPassword } });
-      if (o.error) return h(o.error);
-      let c = await this.getSession();
-      return c.data ? (this.notify("USER_UPDATED", c.data), S(c.data)) : h((_b2 = c.error) != null ? _b2 : { kind: "unauthenticated", message: "no active session", status: 0 });
-    }
-    async getSession() {
-      try {
-        return S(await this.sessions.ensure());
-      } catch (e) {
-        return h(ue(e) ? e : W(e));
-      }
-    }
-    async refreshSession() {
-      try {
-        return S(await this.sessions.forceRefresh());
-      } catch (e) {
-        return h(ue(e) ? e : W(e));
-      }
-    }
-    async getUser() {
-      let e = await this.getAccessToken();
-      if (!e) return h({ kind: "unauthenticated", message: "no active session", status: 0 });
-      let t = await this.request(w.userMe, { method: "GET", token: e });
-      return t.error ? (Me(t.error) && this.sessions.clear(), h(t.error)) : S(Ne(t.data));
-    }
-    async signOut() {
-      let e = this.sessions.peek();
-      return (e == null ? void 0 : e.accessToken) && await this.request(w.signOut, { method: "POST", body: {}, token: e.accessToken }), this.sessions.clear(), S(null);
-    }
-    onAuthStateChange(e) {
-      let t = this.nextListenerId++;
-      return this.listeners.set(t, e), qe(e, "INITIAL_SESSION", this.sessions.peek()), () => {
-        this.listeners.delete(t);
-      };
-    }
-    async startRelayOAuth(e, t) {
-      var _a2;
-      let s;
-      try {
-        s = new URL(t);
-      } catch {
-        return h(p("signInWithOAuth requires an absolute redirectTo URL"));
-      }
-      let n = new URL(`${this.oauthRelayBaseUrl}/authorize`);
-      if (n.searchParams.set("provider", e.provider), n.searchParams.set("callback_url", s.toString()), e.provider === "workbuddy") {
-        let i = await this.createWorkBuddyProof();
-        if (i.error || !i.data) return h((_a2 = i.error) != null ? _a2 : p("signInWithOAuth could not create PKCE"));
-        n.searchParams.set("code_challenge", i.data), n.searchParams.set("code_challenge_method", "S256");
-      }
-      return S({ url: n.toString() });
-    }
-    async createWorkBuddyProof() {
-      if (!Ie()) return h(p("workbuddy sign-in requires WebCrypto; it is unavailable in this runtime (an insecure http:// origin disables it \u2014 serve the app over https)"));
-      if (!this.workBuddyPkce.usable()) return h(p("workbuddy sign-in requires sessionStorage to keep the PKCE verifier across the redirect; it is unavailable in this runtime"));
-      let e, t;
-      try {
-        e = je(), t = await De(e);
-      } catch (s) {
-        return h(p(`workbuddy sign-in could not create a PKCE proof: ${Ft(s)}`));
-      }
-      return this.workBuddyPkce.saveVerifier(e) ? S(t) : h(p("workbuddy sign-in could not persist the PKCE verifier"));
-    }
-    async exchangeRefreshHandle(e) {
-      let t = await this.request(w.token, { method: "POST", body: { grant_type: "refresh_token", refresh_token: e } });
-      if (t.error) throw t.error;
-      return be(t.data, Date.now());
-    }
-    async postForSession(e, t, s = {}) {
-      let n = await this.request(e, { method: "POST", body: t, headers: s.headers });
-      if (n.error) return h(n.error);
-      try {
-        return S(this.sessions.commitSignIn(be(n.data, Date.now())));
-      } catch (i) {
-        return h(ue(i) ? i : W(i));
-      }
-    }
-    async request(e, t) {
-      let s = { ...t.headers };
-      t.body !== void 0 && (s["Content-Type"] = "application/json"), t.token && (s.Authorization = `Bearer ${t.token}`);
-      let n;
-      try {
-        n = await this.fetch(this.baseUrl + e, { method: t.method, headers: s, body: t.body === void 0 ? void 0 : JSON.stringify(t.body) });
-      } catch (o) {
-        return h(W(o));
-      }
-      let i = await Bt(n);
-      return n.ok ? S(i) : h(Fe(n.status, i));
-    }
-    notify(e, t) {
-      for (let s of this.listeners.values()) qe(s, e, t);
-    }
-  }, a(_e2, "AuthModule"), _e2);
-  function S(r) {
-    return { data: r, error: null };
-  }
-  a(S, "ok");
-  function h(r) {
-    return { data: null, error: r };
-  }
-  a(h, "fail");
-  function p(r) {
-    return { kind: "invalid-request", message: r, status: 0 };
-  }
-  a(p, "badRequest");
-  function Ft(r) {
-    return We(r instanceof Error ? r.message : String(r), He);
-  }
-  a(Ft, "describeError");
-  function ue(r) {
-    return !!r && typeof r == "object" && typeof r.kind == "string";
-  }
-  a(ue, "isCloudError");
-  function Me(r) {
-    return r.kind === "unauthenticated" || r.code === "invalid_grant";
-  }
-  a(Me, "rejectedCredentials");
-  async function Bt(r) {
-    let e = await r.text();
-    if (!e) return null;
-    try {
-      return JSON.parse(e);
-    } catch {
-      return { message: e };
-    }
-  }
-  a(Bt, "readBody");
-  function qe(r, e, t) {
-    try {
-      r(e, t);
-    } catch {
-    }
-  }
-  a(qe, "safeInvoke");
-  function Mt() {
-    let r = globalThis.location;
-    return r ? r.origin + r.pathname : "";
-  }
-  a(Mt, "currentPageUrl");
-  function Ee() {
-    var _a2, _b2;
-    return (_b2 = (_a2 = globalThis.location) == null ? void 0 : _a2.search) != null ? _b2 : "";
-  }
-  a(Ee, "currentPageSearch");
-  var xe = a((r) => Math.min(1e3 * 2 ** r, 3e4), "getRetryDelay"), Ke = [520, 503], ke = ["GET", "HEAD", "OPTIONS"];
-  var U = (_f = class extends Error {
-    constructor(e) {
-      super(e.message);
-      __publicField(this, "details");
-      __publicField(this, "hint");
-      __publicField(this, "code");
-      this.name = "PostgrestError", this.details = e.details, this.hint = e.hint, this.code = e.code;
-    }
-    toJSON() {
-      return { name: this.name, message: this.message, details: this.details, hint: this.hint, code: this.code };
-    }
-  }, a(_f, "PostgrestError"), _f);
-  function ze(r, e) {
-    return new Promise((t) => {
-      if (e == null ? void 0 : e.aborted) {
-        t();
-        return;
-      }
-      let s = setTimeout(() => {
-        e == null ? void 0 : e.removeEventListener("abort", n), t();
-      }, r);
-      function n() {
-        clearTimeout(s), t();
-      }
-      a(n, "onAbort"), e == null ? void 0 : e.addEventListener("abort", n);
-    });
-  }
-  a(ze, "sleep");
-  function qt(r, e, t, s) {
-    return !(!s || t >= 3 || !ke.includes(r) || !Ke.includes(e));
-  }
-  a(qt, "shouldRetry");
-  var K = (_g = class {
-    constructor(e) {
-      __publicField(this, "method");
-      __publicField(this, "url");
-      __publicField(this, "headers");
-      __publicField(this, "schema");
-      __publicField(this, "body");
-      __publicField(this, "shouldThrowOnError", false);
-      __publicField(this, "signal");
-      __publicField(this, "fetch");
-      __publicField(this, "isMaybeSingle");
-      __publicField(this, "shouldStripNulls");
-      __publicField(this, "urlLengthLimit");
-      __publicField(this, "retryEnabled", true);
-      var _a2, _b2, _c2, _d2, _e3;
-      this.method = e.method, this.url = e.url, this.headers = new Headers(e.headers), this.schema = e.schema, this.body = e.body, this.shouldThrowOnError = (_a2 = e.shouldThrowOnError) != null ? _a2 : false, this.signal = e.signal, this.isMaybeSingle = (_b2 = e.isMaybeSingle) != null ? _b2 : false, this.shouldStripNulls = (_c2 = e.shouldStripNulls) != null ? _c2 : false, this.urlLengthLimit = (_d2 = e.urlLengthLimit) != null ? _d2 : 8e3, this.retryEnabled = (_e3 = e.retry) != null ? _e3 : true, e.fetch ? this.fetch = e.fetch : this.fetch = fetch;
-    }
-    throwOnError() {
-      return this.shouldThrowOnError = true, this;
-    }
-    stripNulls() {
-      if (this.headers.get("Accept") === "text/csv") throw new Error("stripNulls() cannot be used with csv()");
-      return this.shouldStripNulls = true, this;
-    }
-    setHeader(e, t) {
-      return this.headers = new Headers(this.headers), this.headers.set(e, t), this;
-    }
-    retry(e) {
-      return this.retryEnabled = e, this;
-    }
-    then(e, t) {
-      if (this.schema === void 0 || (["GET", "HEAD"].includes(this.method) ? this.headers.set("Accept-Profile", this.schema) : this.headers.set("Content-Profile", this.schema)), this.method !== "GET" && this.method !== "HEAD" && this.headers.set("Content-Type", "application/json"), this.shouldStripNulls) {
-        let o = this.headers.get("Accept");
-        o === "application/vnd.pgrst.object+json" ? this.headers.set("Accept", "application/vnd.pgrst.object+json;nulls=stripped") : (!o || o === "application/json") && this.headers.set("Accept", "application/vnd.pgrst.array+json;nulls=stripped");
-      }
-      let s = this.fetch, i = a(async () => {
-        var _a2, _b2;
-        let o = 0;
-        for (; ; ) {
-          let c = {};
-          this.headers.forEach((d, l) => {
-            c[l] = d;
-          }), o > 0 && (c["X-Retry-Count"] = String(o));
-          let u;
-          try {
-            u = await s(this.url.toString(), { method: this.method, headers: c, body: JSON.stringify(this.body, (d, l) => typeof l == "bigint" ? l.toString() : l), signal: this.signal });
-          } catch (d) {
-            if ((d == null ? void 0 : d.name) === "AbortError" || (d == null ? void 0 : d.code) === "ABORT_ERR" || !ke.includes(this.method)) throw d;
-            if (this.retryEnabled && o < 3) {
-              let l = xe(o);
-              o++, await ze(l, this.signal);
-              continue;
-            }
-            throw d;
-          }
-          if (qt(this.method, u.status, o, this.retryEnabled)) {
-            let d = (_b2 = (_a2 = u.headers) == null ? void 0 : _a2.get("Retry-After")) != null ? _b2 : null, l = d !== null ? Math.max(0, parseInt(d, 10) || 0) * 1e3 : xe(o);
-            await u.text(), o++, await ze(l, this.signal);
-            continue;
-          }
-          return await this.processResponse(u);
-        }
-      }, "executeWithRetry")();
-      return this.shouldThrowOnError || (i = i.catch((o) => {
-        var _a2, _b2, _c2, _d2, _e3, _f2;
-        let c = "", u = "", d = "", l = o == null ? void 0 : o.cause;
-        if (l) {
-          let g = (_a2 = l == null ? void 0 : l.message) != null ? _a2 : "", y = (_b2 = l == null ? void 0 : l.code) != null ? _b2 : "";
-          c = `${(_c2 = o == null ? void 0 : o.name) != null ? _c2 : "FetchError"}: ${o == null ? void 0 : o.message}`, c += `
 
-Caused by: ${(_d2 = l == null ? void 0 : l.name) != null ? _d2 : "Error"}: ${g}`, y && (c += ` (${y})`), (l == null ? void 0 : l.stack) && (c += `
-${l.stack}`);
-        } else c = (_e3 = o == null ? void 0 : o.stack) != null ? _e3 : "";
-        let f = this.url.toString().length;
-        return (o == null ? void 0 : o.name) === "AbortError" || (o == null ? void 0 : o.code) === "ABORT_ERR" ? (d = "", u = "Request was aborted (timeout or manual cancellation)", f > this.urlLengthLimit && (u += `. Note: Your request URL is ${f} characters, which may exceed server limits. If selecting many fields, consider using views. If filtering with large arrays (e.g., .in('id', [many IDs])), consider using an RPC function to pass values server-side.`)) : ((l == null ? void 0 : l.name) === "HeadersOverflowError" || (l == null ? void 0 : l.code) === "UND_ERR_HEADERS_OVERFLOW") && (d = "", u = "HTTP headers exceeded server limits (typically 16KB)", f > this.urlLengthLimit && (u += `. Your request URL is ${f} characters. If selecting many fields, consider using views. If filtering with large arrays (e.g., .in('id', [200+ IDs])), consider using an RPC function instead.`)), { success: false, error: { message: `${(_f2 = o == null ? void 0 : o.name) != null ? _f2 : "FetchError"}: ${o == null ? void 0 : o.message}`, details: c, hint: u, code: d }, data: null, count: null, status: 0, statusText: "" };
-      })), i.then(e, t);
-    }
-    async processResponse(e) {
-      var _a2, _b2, _c2, _d2;
-      let t = null, s = null, n = null, i = e.status, o = e.statusText;
-      if (e.ok) {
-        if (this.method !== "HEAD") {
-          let d = await e.text();
-          if (d !== "") if (this.headers.get("Accept") === "text/csv") s = d;
-          else if (this.headers.get("Accept") && ((_a2 = this.headers.get("Accept")) == null ? void 0 : _a2.includes("application/vnd.pgrst.plan+text"))) s = d;
-          else try {
-            s = JSON.parse(d);
-          } catch {
-            if (t = { message: d }, s = null, this.shouldThrowOnError) throw new U({ message: d, details: "", hint: "", code: "" });
-          }
-        }
-        let c = (_b2 = this.headers.get("Prefer")) == null ? void 0 : _b2.match(/count=(exact|planned|estimated)/), u = (_c2 = e.headers.get("content-range")) == null ? void 0 : _c2.split("/");
-        if (c && u && u.length > 1 && (n = parseInt(u[1])), this.isMaybeSingle && Array.isArray(s)) if (s.length > 1) {
-          if (t = { code: "PGRST116", details: `Results contain ${s.length} rows, application/vnd.pgrst.object+json requires 1 row`, hint: null, message: "JSON object requested, multiple (or no) rows returned" }, s = null, n = null, i = 406, o = "Not Acceptable", this.shouldThrowOnError) throw new U({ ...t, hint: (_d2 = t.hint) != null ? _d2 : "" });
-        } else s.length === 1 ? s = s[0] : s = null;
-      } else {
-        let c = await e.text();
-        try {
-          t = JSON.parse(c), Array.isArray(t) && e.status === 404 && (s = [], t = null, i = 200, o = "OK");
-        } catch {
-          e.status === 404 && c === "" ? (i = 204, o = "No Content") : t = { message: c };
-        }
-        if (t && this.shouldThrowOnError) throw new U(t);
-      }
-      return { success: t === null, error: t, data: s, count: n, status: i, statusText: o };
-    }
-    returns() {
-      return this;
-    }
-    overrideTypes() {
-      return this;
-    }
-  }, a(_g, "PostgrestBuilder"), _g);
-  var z = (_h = class extends K {
-    throwOnError() {
-      return super.throwOnError();
-    }
-    select(e) {
-      let t = false, s = (e != null ? e : "*").split("").map((n) => /\s/.test(n) && !t ? "" : (n === '"' && (t = !t), n)).join("");
-      return this.url.searchParams.set("select", s), this.headers.append("Prefer", "return=representation"), this;
-    }
-    order(e, { ascending: t = true, nullsFirst: s, foreignTable: n, referencedTable: i = n } = {}) {
-      let o = i ? `${i}.order` : "order", c = this.url.searchParams.get(o);
-      return this.url.searchParams.set(o, `${c ? `${c},` : ""}${e}.${t ? "asc" : "desc"}${s === void 0 ? "" : s ? ".nullsfirst" : ".nullslast"}`), this;
-    }
-    limit(e, { foreignTable: t, referencedTable: s = t } = {}) {
-      let n = typeof s > "u" ? "limit" : `${s}.limit`;
-      return this.url.searchParams.set(n, `${e}`), this;
-    }
-    range(e, t, { foreignTable: s, referencedTable: n = s } = {}) {
-      let i = typeof n > "u" ? "offset" : `${n}.offset`, o = typeof n > "u" ? "limit" : `${n}.limit`;
-      return this.url.searchParams.set(i, `${e}`), this.url.searchParams.set(o, `${t - e + 1}`), this;
-    }
-    abortSignal(e) {
-      return this.signal = e, this;
-    }
-    single() {
-      return this.headers.set("Accept", "application/vnd.pgrst.object+json"), this;
-    }
-    maybeSingle() {
-      return this.isMaybeSingle = true, this;
-    }
-    csv() {
-      return this.headers.set("Accept", "text/csv"), this;
-    }
-    geojson() {
-      return this.headers.set("Accept", "application/geo+json"), this;
-    }
-    explain({ analyze: e = false, verbose: t = false, settings: s = false, buffers: n = false, wal: i = false, format: o = "text" } = {}) {
-      var _a2;
-      let c = [e ? "analyze" : null, t ? "verbose" : null, s ? "settings" : null, n ? "buffers" : null, i ? "wal" : null].filter(Boolean).join("|"), u = (_a2 = this.headers.get("Accept")) != null ? _a2 : "application/json";
-      return this.headers.set("Accept", `application/vnd.pgrst.plan+${o}; for="${u}"; options=${c};`), o === "json" ? this : this;
-    }
-    rollback() {
-      return this.headers.append("Prefer", "tx=rollback"), this;
-    }
-    returns() {
-      return this;
-    }
-    maxAffected(e) {
-      return this.headers.append("Prefer", "handling=strict"), this.headers.append("Prefer", `max-affected=${e}`), this;
-    }
-  }, a(_h, "PostgrestTransformBuilder"), _h);
-  var Ge = new RegExp("[,()]"), O = (_i = class extends z {
-    throwOnError() {
-      return super.throwOnError();
-    }
-    eq(e, t) {
-      return this.url.searchParams.append(e, `eq.${t}`), this;
-    }
-    neq(e, t) {
-      return this.url.searchParams.append(e, `neq.${t}`), this;
-    }
-    gt(e, t) {
-      return this.url.searchParams.append(e, `gt.${t}`), this;
-    }
-    gte(e, t) {
-      return this.url.searchParams.append(e, `gte.${t}`), this;
-    }
-    lt(e, t) {
-      return this.url.searchParams.append(e, `lt.${t}`), this;
-    }
-    lte(e, t) {
-      return this.url.searchParams.append(e, `lte.${t}`), this;
-    }
-    like(e, t) {
-      return this.url.searchParams.append(e, `like.${t}`), this;
-    }
-    likeAllOf(e, t) {
-      return this.url.searchParams.append(e, `like(all).{${t.join(",")}}`), this;
-    }
-    likeAnyOf(e, t) {
-      return this.url.searchParams.append(e, `like(any).{${t.join(",")}}`), this;
-    }
-    ilike(e, t) {
-      return this.url.searchParams.append(e, `ilike.${t}`), this;
-    }
-    ilikeAllOf(e, t) {
-      return this.url.searchParams.append(e, `ilike(all).{${t.join(",")}}`), this;
-    }
-    ilikeAnyOf(e, t) {
-      return this.url.searchParams.append(e, `ilike(any).{${t.join(",")}}`), this;
-    }
-    regexMatch(e, t) {
-      return this.url.searchParams.append(e, `match.${t}`), this;
-    }
-    regexIMatch(e, t) {
-      return this.url.searchParams.append(e, `imatch.${t}`), this;
-    }
-    is(e, t) {
-      return this.url.searchParams.append(e, `is.${t}`), this;
-    }
-    isDistinct(e, t) {
-      return this.url.searchParams.append(e, `isdistinct.${t}`), this;
-    }
-    in(e, t) {
-      let s = Array.from(new Set(t)).map((n) => typeof n == "string" && Ge.test(n) ? `"${n}"` : `${n}`).join(",");
-      return this.url.searchParams.append(e, `in.(${s})`), this;
-    }
-    notIn(e, t) {
-      let s = Array.from(new Set(t)).map((n) => typeof n == "string" && Ge.test(n) ? `"${n}"` : `${n}`).join(",");
-      return this.url.searchParams.append(e, `not.in.(${s})`), this;
-    }
-    contains(e, t) {
-      return typeof t == "string" ? this.url.searchParams.append(e, `cs.${t}`) : Array.isArray(t) ? this.url.searchParams.append(e, `cs.{${t.join(",")}}`) : this.url.searchParams.append(e, `cs.${JSON.stringify(t)}`), this;
-    }
-    containedBy(e, t) {
-      return typeof t == "string" ? this.url.searchParams.append(e, `cd.${t}`) : Array.isArray(t) ? this.url.searchParams.append(e, `cd.{${t.join(",")}}`) : this.url.searchParams.append(e, `cd.${JSON.stringify(t)}`), this;
-    }
-    rangeGt(e, t) {
-      return this.url.searchParams.append(e, `sr.${t}`), this;
-    }
-    rangeGte(e, t) {
-      return this.url.searchParams.append(e, `nxl.${t}`), this;
-    }
-    rangeLt(e, t) {
-      return this.url.searchParams.append(e, `sl.${t}`), this;
-    }
-    rangeLte(e, t) {
-      return this.url.searchParams.append(e, `nxr.${t}`), this;
-    }
-    rangeAdjacent(e, t) {
-      return this.url.searchParams.append(e, `adj.${t}`), this;
-    }
-    overlaps(e, t) {
-      return typeof t == "string" ? this.url.searchParams.append(e, `ov.${t}`) : this.url.searchParams.append(e, `ov.{${t.join(",")}}`), this;
-    }
-    textSearch(e, t, { config: s, type: n } = {}) {
-      let i = "";
-      n === "plain" ? i = "pl" : n === "phrase" ? i = "ph" : n === "websearch" && (i = "w");
-      let o = s === void 0 ? "" : `(${s})`;
-      return this.url.searchParams.append(e, `${i}fts${o}.${t}`), this;
-    }
-    match(e) {
-      return Object.entries(e).filter(([t, s]) => s !== void 0).forEach(([t, s]) => {
-        this.url.searchParams.append(t, `eq.${s}`);
-      }), this;
-    }
-    not(e, t, s) {
-      return this.url.searchParams.append(e, `not.${t}.${s}`), this;
-    }
-    or(e, { foreignTable: t, referencedTable: s = t } = {}) {
-      let n = s ? `${s}.or` : "or";
-      return this.url.searchParams.append(n, `(${e})`), this;
-    }
-    filter(e, t, s) {
-      return this.url.searchParams.append(e, `${t}.${s}`), this;
-    }
-  }, a(_i, "PostgrestFilterBuilder"), _i);
-  var V = (_j = class {
-    constructor(e, { headers: t = {}, schema: s, fetch: n, urlLengthLimit: i = 8e3, retry: o }) {
-      __publicField(this, "url");
-      __publicField(this, "headers");
-      __publicField(this, "schema");
-      __publicField(this, "signal");
-      __publicField(this, "fetch");
-      __publicField(this, "urlLengthLimit");
-      __publicField(this, "retry");
-      this.url = e, this.headers = new Headers(t), this.schema = s, this.fetch = n, this.urlLengthLimit = i, this.retry = o;
-    }
-    cloneRequestState() {
-      return { url: new URL(this.url.toString()), headers: new Headers(this.headers) };
-    }
-    select(e, t) {
-      let { head: s = false, count: n } = t != null ? t : {}, i = s ? "HEAD" : "GET", o = false, c = (e != null ? e : "*").split("").map((l) => /\s/.test(l) && !o ? "" : (l === '"' && (o = !o), l)).join(""), { url: u, headers: d } = this.cloneRequestState();
-      return u.searchParams.set("select", c), n && d.append("Prefer", `count=${n}`), new O({ method: i, url: u, headers: d, schema: this.schema, fetch: this.fetch, urlLengthLimit: this.urlLengthLimit, retry: this.retry });
-    }
-    insert(e, { count: t, defaultToNull: s = true } = {}) {
-      var _a2;
-      let n = "POST", { url: i, headers: o } = this.cloneRequestState();
-      if (t && o.append("Prefer", `count=${t}`), s || o.append("Prefer", "missing=default"), Array.isArray(e)) {
-        let c = e.reduce((u, d) => u.concat(Object.keys(d)), []);
-        if (c.length > 0) {
-          let u = [...new Set(c)].map((d) => `"${d}"`);
-          i.searchParams.set("columns", u.join(","));
-        }
-      }
-      return new O({ method: n, url: i, headers: o, schema: this.schema, body: e, fetch: (_a2 = this.fetch) != null ? _a2 : fetch, urlLengthLimit: this.urlLengthLimit, retry: this.retry });
-    }
-    upsert(e, { onConflict: t, ignoreDuplicates: s = false, count: n, defaultToNull: i = true } = {}) {
-      var _a2;
-      let o = "POST", { url: c, headers: u } = this.cloneRequestState();
-      if (u.append("Prefer", `resolution=${s ? "ignore" : "merge"}-duplicates`), t !== void 0 && c.searchParams.set("on_conflict", t), n && u.append("Prefer", `count=${n}`), i || u.append("Prefer", "missing=default"), Array.isArray(e)) {
-        let d = e.reduce((l, f) => l.concat(Object.keys(f)), []);
-        if (d.length > 0) {
-          let l = [...new Set(d)].map((f) => `"${f}"`);
-          c.searchParams.set("columns", l.join(","));
-        }
-      }
-      return new O({ method: o, url: c, headers: u, schema: this.schema, body: e, fetch: (_a2 = this.fetch) != null ? _a2 : fetch, urlLengthLimit: this.urlLengthLimit, retry: this.retry });
-    }
-    update(e, { count: t } = {}) {
-      var _a2;
-      let s = "PATCH", { url: n, headers: i } = this.cloneRequestState();
-      return t && i.append("Prefer", `count=${t}`), new O({ method: s, url: n, headers: i, schema: this.schema, body: e, fetch: (_a2 = this.fetch) != null ? _a2 : fetch, urlLengthLimit: this.urlLengthLimit, retry: this.retry });
-    }
-    delete({ count: e } = {}) {
-      var _a2;
-      let t = "DELETE", { url: s, headers: n } = this.cloneRequestState();
-      return e && n.append("Prefer", `count=${e}`), new O({ method: t, url: s, headers: n, schema: this.schema, fetch: (_a2 = this.fetch) != null ? _a2 : fetch, urlLengthLimit: this.urlLengthLimit, retry: this.retry });
-    }
-  }, a(_j, "PostgrestQueryBuilder"), _j);
-  var N = (_k = class {
-    constructor(e, { headers: t = {}, schema: s, fetch: n, timeout: i, urlLengthLimit: o = 8e3, retry: c } = {}) {
-      __publicField(this, "url");
-      __publicField(this, "headers");
-      __publicField(this, "schemaName");
-      __publicField(this, "fetch");
-      __publicField(this, "urlLengthLimit");
-      __publicField(this, "retry");
-      this.url = e, this.headers = new Headers(t), this.schemaName = s, this.urlLengthLimit = o;
-      let u = n != null ? n : globalThis.fetch;
-      i !== void 0 && i > 0 ? this.fetch = (d, l) => {
-        let f = new AbortController(), g = setTimeout(() => f.abort(), i), y = l == null ? void 0 : l.signal;
-        if (y) {
-          if (y.aborted) return clearTimeout(g), u(d, l);
-          let se = a(() => {
-            clearTimeout(g), f.abort();
-          }, "abortHandler");
-          return y.addEventListener("abort", se, { once: true }), u(d, { ...l, signal: f.signal }).finally(() => {
-            clearTimeout(g), y.removeEventListener("abort", se);
-          });
-        }
-        return u(d, { ...l, signal: f.signal }).finally(() => clearTimeout(g));
-      } : this.fetch = u, this.retry = c;
-    }
-    from(e) {
-      if (!e || typeof e != "string" || e.trim() === "") throw new Error("Invalid relation name: relation must be a non-empty string.");
-      let t = new URL(`${this.url}/${e}`);
-      return new V(t, { headers: new Headers(this.headers), schema: this.schemaName, fetch: this.fetch, urlLengthLimit: this.urlLengthLimit, retry: this.retry });
-    }
-    schema(e) {
-      return new _k(this.url, { headers: this.headers, schema: e, fetch: this.fetch, urlLengthLimit: this.urlLengthLimit, retry: this.retry });
-    }
-    rpc(e, t = {}, { head: s = false, get: n = false, count: i } = {}) {
-      var _a2;
-      let o, c = new URL(`${this.url}/rpc/${e}`), u, d = a((g) => g !== null && typeof g == "object" && (!Array.isArray(g) || g.some(d)), "_isObject"), l = s && Object.values(t).some(d);
-      l ? (o = "POST", u = t) : s || n ? (o = s ? "HEAD" : "GET", Object.entries(t).filter(([g, y]) => y !== void 0).map(([g, y]) => [g, Array.isArray(y) ? `{${y.join(",")}}` : `${y}`]).forEach(([g, y]) => {
-        c.searchParams.append(g, y);
-      })) : (o = "POST", u = t);
-      let f = new Headers(this.headers);
-      return l ? f.set("Prefer", i ? `count=${i},return=minimal` : "return=minimal") : i && f.set("Prefer", `count=${i}`), new O({ method: o, url: c, headers: f, schema: this.schemaName, body: u, fetch: (_a2 = this.fetch) != null ? _a2 : fetch, urlLengthLimit: this.urlLengthLimit, retry: this.retry });
-    }
-  }, a(_k, "PostgrestClient"), _k);
-  var G = (_l = class {
-    constructor(e, t) {
-      __publicField(this, "client");
-      __publicField(this, "from");
-      __publicField(this, "rpc");
-      this.client = new N(`${e.endpoint}${A.database}`, { fetch: t }), this.from = this.client.from.bind(this.client), this.rpc = this.client.rpc.bind(this.client);
-    }
-    get url() {
-      return this.client.url;
-    }
-  }, a(_l, "WorkBuddyDatabaseModule"), _l);
-  function Je(r, e) {
-    return new G(r, e);
-  }
-  a(Je, "createDatabaseModule");
-  var x = (_m = class extends Error {
-    constructor(e, t = {}) {
-      let s = typeof e == "string" ? { message: e, type: "server_error", param: null, code: null } : e;
-      super(s.message);
-      __publicField(this, "error");
-      __publicField(this, "status");
-      __publicField(this, "requestId");
-      __publicField(this, "retryAfterMs");
-      this.name = "CloudOpenAIError", this.error = s, this.status = t.status, this.requestId = t.requestId, this.retryAfterMs = t.retryAfterMs, t.cause !== void 0 && ("cause" in this || Object.defineProperty(this, "cause", { value: t.cause, writable: false, enumerable: false, configurable: false }));
-    }
-  }, a(_m, "CloudOpenAIError"), _m);
-  function Ye(r) {
-    if (!r) return;
-    let e = r.trim(), t = Number(e);
-    if (!isNaN(t) && t >= 0 && Number.isInteger(t)) return t * 1e3;
-    let s = Date.parse(e);
-    if (!isNaN(s)) {
-      let n = s - Date.now();
-      return n > 0 ? n : 0;
-    }
-  }
-  a(Ye, "parseRetryAfter");
-  function m(...r) {
-    return r.find((e) => typeof e == "string" && e.length > 0);
-  }
-  a(m, "stringField");
-  function E(...r) {
-    return r.find((e) => typeof e == "number" && Number.isFinite(e));
-  }
-  a(E, "numberField");
-  function k(...r) {
-    return r.find((e) => typeof e == "boolean");
-  }
-  a(k, "booleanField");
-  function Xe(...r) {
-    for (let e of r) {
-      if (typeof e == "number" && Number.isFinite(e)) return e;
-      if (e !== null && typeof e == "object" && !Array.isArray(e)) return Ht(e);
-    }
-  }
-  a(Xe, "contextWindowField");
-  function Ht(r) {
-    let e = {};
-    for (let [t, s] of Object.entries(r)) {
-      if (t === "supportedLengths") {
-        Array.isArray(s) && (e.supportedLengths = s.filter((n) => typeof n == "number" && Number.isFinite(n)));
-        continue;
-      }
-      if (t === "defaultLength") {
-        typeof s == "number" && Number.isFinite(s) && (e.defaultLength = s);
-        continue;
-      }
-      Object.defineProperty(e, t, { value: s, writable: true, enumerable: true, configurable: true });
-    }
-    return e;
-  }
-  a(Ht, "normalizeContextWindowObject");
-  function Qe(r) {
-    if (!r || typeof r != "object") return;
-    let e = r, t = Array.isArray(e.input) ? e.input.filter((n) => typeof n == "string") : void 0, s = Array.isArray(e.output) ? e.output.filter((n) => typeof n == "string") : void 0;
-    return (t == null ? void 0 : t.length) || (s == null ? void 0 : s.length) ? { ...(t == null ? void 0 : t.length) ? { input: t } : {}, ...(s == null ? void 0 : s.length) ? { output: s } : {} } : void 0;
-  }
-  a(Qe, "modalitiesField");
-  function Ze(r) {
-    if (!r || typeof r != "object") return;
-    let t = Object.entries(r).filter(([, s]) => typeof s == "boolean");
-    return t.length ? Object.fromEntries(t) : void 0;
-  }
-  a(Ze, "capabilitiesField");
-  function et(r) {
-    if (!r || typeof r != "object") return;
-    let e = r, t = { ...m(e.currency) ? { currency: e.currency } : {}, ...E(e.inputPerMillionTokens) !== void 0 ? { inputPerMillionTokens: e.inputPerMillionTokens } : {}, ...E(e.outputPerMillionTokens) !== void 0 ? { outputPerMillionTokens: e.outputPerMillionTokens } : {}, ...m(e.displayText) ? { displayText: e.displayText } : {} };
-    return Object.keys(t).length ? t : void 0;
-  }
-  a(et, "pricingField");
-  function tt(r) {
-    if (!r || typeof r != "object") return;
-    let e = r, t = {}, s = m(e.effort);
-    s !== void 0 && (t.effort = s);
-    let n = m(e.defaultEffort);
-    n !== void 0 && (t.defaultEffort = n), Array.isArray(e.supportedEfforts) && (t.supportedEfforts = e.supportedEfforts.filter((c) => typeof c == "string"));
-    let i = m(e.summary);
-    i !== void 0 && (i === "auto" || i === "concise" || i === "detailed") && (t.summary = i);
-    let o = k(e.canDisableThinking);
-    return o !== void 0 && (t.canDisableThinking = o), Object.keys(t).length > 0 ? t : void 0;
-  }
-  a(tt, "reasoningField");
-  function Wt(r) {
-    var _a2, _b2, _c2, _d2, _e3, _f2, _g2, _h2, _i2;
-    let e = m(r.id, r.ID);
-    if (!e) return null;
-    let t = k(r.enabled, r.Enabled), s = k(r.disabled, r.Disabled), n, i;
-    return t !== void 0 ? (n = t, s !== void 0 && (i = s)) : s !== void 0 ? (i = s, n = !s) : n = true, { id: e, name: (_a2 = m(r.name, r.Name)) != null ? _a2 : e, ...m(r.provider, r.Provider) ? { provider: m(r.provider, r.Provider) } : {}, ...m(r.vendor, r.Vendor) ? { vendor: m(r.vendor, r.Vendor) } : {}, ...m(r.family, r.Family) ? { family: m(r.family, r.Family) } : {}, ...m(r.version, r.Version) ? { version: m(r.version, r.Version) } : {}, ...m(r.description, r.Description) ? { description: m(r.description, r.Description) } : {}, ...m(r.descriptionZh, r.DescriptionZh) ? { descriptionZh: m(r.descriptionZh, r.DescriptionZh) } : {}, ...m(r.descriptionEn, r.DescriptionEn) ? { descriptionEn: m(r.descriptionEn, r.DescriptionEn) } : {}, ...m(r.iconUrl, r.IconURL) ? { iconUrl: m(r.iconUrl, r.IconURL) } : {}, ...Xe(r.contextWindow, r.ContextWindow) !== void 0 ? { contextWindow: Xe(r.contextWindow, r.ContextWindow) } : {}, ...E(r.maxInputTokens, r.MaxInputTokens) !== void 0 ? { maxInputTokens: E(r.maxInputTokens, r.MaxInputTokens) } : {}, ...E(r.maxOutputTokens, r.MaxOutputTokens) !== void 0 ? { maxOutputTokens: E(r.maxOutputTokens, r.MaxOutputTokens) } : {}, ...Qe((_b2 = r.modalities) != null ? _b2 : r.Modalities) ? { modalities: Qe((_c2 = r.modalities) != null ? _c2 : r.Modalities) } : {}, ...Ze((_d2 = r.capabilities) != null ? _d2 : r.Capabilities) ? { capabilities: Ze((_e3 = r.capabilities) != null ? _e3 : r.Capabilities) } : {}, enabled: n, ...i !== void 0 ? { disabled: i } : {}, ...k(r.isDefault, r.IsDefault) !== void 0 ? { isDefault: k(r.isDefault, r.IsDefault) } : {}, ...E(r.sortOrder, r.SortOrder) !== void 0 ? { sortOrder: E(r.sortOrder, r.SortOrder) } : {}, ...et((_f2 = r.pricing) != null ? _f2 : r.Pricing) ? { pricing: et((_g2 = r.pricing) != null ? _g2 : r.Pricing) } : {}, ...m(r.credits, r.Credits) ? { credits: m(r.credits, r.Credits) } : {}, ...E(r.maxAllowedSize, r.MaxAllowedSize) !== void 0 ? { maxAllowedSize: E(r.maxAllowedSize, r.MaxAllowedSize) } : {}, ...k(r.disabledMultimodal, r.DisabledMultimodal) !== void 0 ? { disabledMultimodal: k(r.disabledMultimodal, r.DisabledMultimodal) } : {}, ...k(r.supportsImages, r.SupportsImages) !== void 0 ? { supportsImages: k(r.supportsImages, r.SupportsImages) } : {}, ...k(r.supportsToolCall, r.SupportsToolCall) !== void 0 ? { supportsToolCall: k(r.supportsToolCall, r.SupportsToolCall) } : {}, ...k(r.supportsReasoning, r.SupportsReasoning) !== void 0 ? { supportsReasoning: k(r.supportsReasoning, r.SupportsReasoning) } : {}, ...k(r.onlyReasoning, r.OnlyReasoning) !== void 0 ? { onlyReasoning: k(r.onlyReasoning, r.OnlyReasoning) } : {}, ...tt((_h2 = r.reasoning) != null ? _h2 : r.Reasoning) ? { reasoning: tt((_i2 = r.reasoning) != null ? _i2 : r.Reasoning) } : {}, ...E(r.temperature, r.Temperature) !== void 0 ? { temperature: E(r.temperature, r.Temperature) } : {}, ...E(r.top_k, r.Top_K) !== void 0 ? { top_k: E(r.top_k, r.Top_K) } : {}, ...E(r.top_p, r.Top_P) !== void 0 ? { top_p: E(r.top_p, r.Top_P) } : {}, ...E(r.repetition_penalty, r.Repetition_Penalty) !== void 0 ? { repetition_penalty: E(r.repetition_penalty, r.Repetition_Penalty) } : {} };
-  }
-  a(Wt, "normalizeModel");
-  function ve(r) {
-    return r.name || r.id;
-  }
-  a(ve, "getModelDisplayName");
-  function Pe(r, e) {
-    var _a2;
-    return (_a2 = r.capabilities) == null ? void 0 : _a2[e];
-  }
-  a(Pe, "getModelCapability");
-  var de = (_n = class {
-    constructor(e, t) {
-      __publicField(this, "baseUrl");
-      __publicField(this, "fetch");
-      this.baseUrl = e, this.fetch = t;
-    }
-    async list(e) {
-      var _a2;
-      let t;
-      try {
-        t = await this.fetch(`${this.baseUrl}/models`, { method: "GET", headers: { Accept: "application/json" }, signal: e });
-      } catch (c) {
-        throw c instanceof Error && c.name === "AbortError" ? c : new x({ message: `Network error: ${(_a2 = c == null ? void 0 : c.message) != null ? _a2 : "unknown"}`, type: "server_error", param: null, code: "gateway_network_error" }, { cause: c });
-      }
-      if (!t.ok) throw await _e(t);
-      let s = await t.text(), n;
-      try {
-        n = JSON.parse(s);
-      } catch {
-        throw new x({ message: "Failed to parse models response: invalid JSON", type: "server_error", param: null, code: "gateway_invalid_response" });
-      }
-      let i = Array.isArray(n) ? n : Array.isArray(n == null ? void 0 : n.data) ? n.data : [], o = [];
-      for (let c of i) {
-        let u = Wt(c);
-        u && o.push(u);
-      }
-      return o;
-    }
-  }, a(_n, "ModelsAPI"), _n);
-  async function _e(r) {
-    var _a2;
-    let e = await r.text().catch(() => ""), t;
-    try {
-      let i = JSON.parse(e);
-      if (i && typeof i == "object" && i.error) {
-        let o = i.error;
-        t = { message: typeof o.message == "string" ? o.message : `HTTP ${r.status}`, type: typeof o.type == "string" ? o.type : "server_error", param: o.param === void 0 ? null : o.param, code: o.code === void 0 ? null : o.code };
-      } else t = { message: typeof i == "string" ? i : `HTTP ${r.status}`, type: "server_error", param: null, code: null };
-    } catch {
-      t = { message: e || `HTTP ${r.status}`, type: "server_error", param: null, code: null };
-    }
-    let s = (_a2 = r.headers.get("x-request-id")) != null ? _a2 : void 0, n = Ye(r.headers.get("retry-after"));
-    return new x(t, { status: r.status, requestId: s, retryAfterMs: n });
-  }
-  a(_e, "httpError");
-  var le = (_o = class {
-    constructor() {
-      __publicField(this, "codePoint", 0);
-      __publicField(this, "bytesNeeded", 0);
-      __publicField(this, "bytesSeen", 0);
-      __publicField(this, "lowerBoundary", 128);
-      __publicField(this, "upperBoundary", 191);
-      __publicField(this, "bomSeen", false);
-      __publicField(this, "streaming", false);
-    }
-    resetSequence() {
-      this.codePoint = 0, this.bytesNeeded = 0, this.bytesSeen = 0, this.lowerBoundary = 128, this.upperBoundary = 191;
-    }
-    decode(e = new Uint8Array(), t = {}) {
-      this.streaming || (this.resetSequence(), this.bomSeen = false), this.streaming = t.stream === true;
-      let s = "", n = a((i) => {
-        !this.bomSeen && (this.bomSeen = true, i === 65279) || (s += String.fromCodePoint(i));
-      }, "emit");
-      for (let i = 0; i < e.length; i++) {
-        let o = e[i];
-        if (this.bytesNeeded === 0) {
-          o <= 127 ? n(o) : o >= 194 && o <= 223 ? (this.bytesNeeded = 1, this.codePoint = o & 31) : o >= 224 && o <= 239 ? (this.bytesNeeded = 2, this.codePoint = o & 15, o === 224 && (this.lowerBoundary = 160), o === 237 && (this.upperBoundary = 159)) : o >= 240 && o <= 244 ? (this.bytesNeeded = 3, this.codePoint = o & 7, o === 240 && (this.lowerBoundary = 144), o === 244 && (this.upperBoundary = 143)) : n(65533);
-          continue;
-        }
-        if (o < this.lowerBoundary || o > this.upperBoundary) {
-          this.resetSequence(), n(65533), i--;
-          continue;
-        }
-        this.lowerBoundary = 128, this.upperBoundary = 191, this.codePoint = this.codePoint << 6 | o & 63, this.bytesSeen++, this.bytesSeen === this.bytesNeeded && (n(this.codePoint), this.resetSequence());
-      }
-      return !this.streaming && this.bytesNeeded > 0 && (n(65533), this.resetSequence()), s;
-    }
-  }, a(_o, "Utf8Decoder"), _o);
-  var Kt = (_p = class {
-    constructor() {
-      __publicField(this, "event", null);
-      __publicField(this, "dataParts", []);
-    }
-    decode(e) {
-      let t = e;
-      if (t.endsWith("\r") && (t = t.slice(0, -1)), t === "") {
-        if (this.event === null && this.dataParts.length === 0) return null;
-        let o = { event: this.event, data: this.dataParts.join(`
-`) };
-        return this.event = null, this.dataParts = [], o;
-      }
-      if (t.startsWith(":")) return null;
-      let s = t.indexOf(":"), n, i;
-      if (s === -1) n = t, i = "";
-      else {
-        n = t.slice(0, s);
-        let o = t.slice(s + 1);
-        o.startsWith(" ") && (o = o.slice(1)), i = o;
-      }
-      return n === "event" ? this.event = i : n === "data" && this.dataParts.push(i), null;
-    }
-    flush() {
-      if (this.event === null && this.dataParts.length === 0) return null;
-      let e = { event: this.event, data: this.dataParts.join(`
-`) };
-      return this.event = null, this.dataParts = [], e;
-    }
-  }, a(_p, "SSEDecoder"), _p), zt = (_q = class {
-    constructor() {
-      __publicField(this, "buffer", new Uint8Array());
-      __publicField(this, "decoder");
-      this.decoder = typeof TextDecoder > "u" ? new le() : new TextDecoder("utf-8");
-    }
-    decode(e) {
-      let t = new Uint8Array(this.buffer.length + e.length);
-      t.set(this.buffer), t.set(e, this.buffer.length), this.buffer = t;
-      let s = [], n = 0;
-      for (let i = 0; i < this.buffer.length; i++) if (this.buffer[i] === 10 || this.buffer[i] === 13) {
-        let o = this.buffer.subarray(n, i), c = this.decoder.decode(o, { stream: true });
-        s.push(c), this.buffer[i] === 13 && i + 1 < this.buffer.length && this.buffer[i + 1] === 10 && i++, n = i + 1;
-      }
-      return n > 0 && (this.buffer = this.buffer.slice(n)), s;
-    }
-    flush() {
-      if (this.buffer.length === 0) {
-        let t = this.decoder.decode();
-        return t ? [t] : [];
-      }
-      let e = this.decoder.decode(this.buffer, { stream: false });
-      return this.buffer = new Uint8Array(), e ? [e] : [];
-    }
-  }, a(_q, "LineDecoder"), _q), rt = "[DONE]";
-  async function* st(r, e) {
-    let t = new Kt(), s = new zt(), n = r.getReader(), i = false, o = a(() => {
-      i = true, n.cancel().catch(() => {
-      });
-    }, "onAbort");
-    if (e) {
-      if (e.aborted) return;
-      e.addEventListener("abort", o, { once: true });
-    }
-    try {
-      for (; ; ) {
-        if (i) return;
-        let u;
-        try {
-          u = await n.read();
-        } catch (f) {
-          if (i || f instanceof Error && f.name === "AbortError") return;
-          throw f;
-        }
-        let { done: d, value: l } = u;
-        if (d) break;
-        for (let f of s.decode(l)) {
-          let g = t.decode(f);
-          g && (yield g);
-        }
-      }
-      for (let u of s.flush()) {
-        let d = t.decode(u);
-        d && (yield d);
-      }
-      let c = t.flush();
-      c && (yield c);
-    } finally {
-      e && e.removeEventListener("abort", o);
-      try {
-        n.releaseLock();
-      } catch {
-      }
-    }
-  }
-  a(st, "iterSSEEvents");
-  function Vt(r, e) {
-    var _a2;
-    let t = e ? { requestId: e } : {};
-    try {
-      let s = JSON.parse(r);
-      if (s && typeof s == "object") {
-        let n = (_a2 = s.error) != null ? _a2 : s;
-        if (n && typeof n == "object") return new x({ message: typeof n.message == "string" ? n.message : "Stream error", type: typeof n.type == "string" ? n.type : "server_error", param: n.param === void 0 ? null : n.param, code: n.code === void 0 ? null : n.code }, t);
-      }
-    } catch {
-    }
-    return new x({ message: r || "Stream error", type: "server_error", param: null, code: null }, t);
-  }
-  a(Vt, "extractSSEError");
-  var he = (_r = class {
-    constructor(e, t) {
-      __publicField(this, "baseUrl");
-      __publicField(this, "fetch");
-      this.baseUrl = e, this.fetch = t;
-    }
-    create(e) {
-      if (e.stream !== true) throw new x({ message: "stream must be true; non-streaming chat completions are not supported", type: "invalid_request_error", param: "stream", code: "request_stream_required" });
-      return this.createStreaming(e);
-    }
-    async *createStreaming(e) {
-      var _a2, _b2, _c2;
-      let { signal: t, conversationId: s, ...n } = e;
-      n.stream = true;
-      let i;
-      try {
-        i = await this.fetch(`${this.baseUrl}/chat/completions`, { method: "POST", headers: { Accept: "text/event-stream", "Content-Type": "application/json", ...s !== void 0 ? { "X-Conversation-ID": s } : {} }, body: JSON.stringify(n), signal: t });
-      } catch (d) {
-        if (d instanceof Error && d.name === "AbortError") return;
-        throw new x({ message: `Network error: ${(_a2 = d == null ? void 0 : d.message) != null ? _a2 : "unknown"}`, type: "server_error", param: null, code: "gateway_network_error" }, { cause: d });
-      }
-      if (!i.ok) throw await _e(i);
-      if (!i.body) throw new x({ message: "Response body is empty \u2014 streaming not supported", type: "server_error", param: null, code: "gateway_invalid_response" }, { requestId: (_b2 = i.headers.get("x-request-id")) != null ? _b2 : void 0 });
-      let o = (_c2 = i.headers.get("x-request-id")) != null ? _c2 : void 0, c = false, u = false;
-      try {
-        for await (let d of st(i.body, t)) {
-          if (d.event === "error") throw u = true, Vt(d.data, o);
-          if (d.event === null || d.event === "") {
-            if (d.data === rt) {
-              c = true;
-              return;
-            }
-            if (!d.data) continue;
-            let l;
-            try {
-              l = JSON.parse(d.data);
-            } catch {
-              throw u = true, new x({ message: `Failed to parse SSE data: ${d.data}`, type: "server_error", param: null, code: "gateway_invalid_response" }, { requestId: o });
-            }
-            if (l && typeof l == "object" && "error" in l) {
-              u = true;
-              let f = l.error;
-              throw new x({ message: typeof (f == null ? void 0 : f.message) == "string" ? f.message : "Stream error", type: typeof (f == null ? void 0 : f.type) == "string" ? f.type : "server_error", param: (f == null ? void 0 : f.param) === void 0 ? null : f.param, code: (f == null ? void 0 : f.code) === void 0 ? null : f.code }, { requestId: o });
-            }
-            yield l;
-          }
-        }
-      } catch (d) {
-        if (d instanceof Error && d.name === "AbortError") return;
-        throw u = true, d;
-      }
-      if (!c && !u && !(t == null ? void 0 : t.aborted)) throw new x({ message: "\u6D41\u5F0F\u54CD\u5E94\u4E2D\u65AD\u3002", type: "server_error", param: null, code: "gateway_stream_interrupted" }, { requestId: o });
-    }
-  }, a(_r, "ChatCompletionsAPI"), _r);
-  var F = (_s = class {
-    constructor(e, t) {
-      __publicField(this, "fetch");
-      __publicField(this, "baseUrl");
-      __publicField(this, "models");
-      __publicField(this, "chat");
-      this.fetch = t, this.baseUrl = `${e.endpoint}${A.llm}`, this.models = new de(this.baseUrl, this.fetch), this.chat = { completions: new he(this.baseUrl, this.fetch) };
-    }
-  }, a(_s, "LlmModule"), _s);
-  var B = (_t2 = class extends Error {
-    constructor(e, t = "storage", s, n) {
-      super(e);
-      __publicField(this, "__isStorageError", true);
-      __publicField(this, "namespace");
-      __publicField(this, "status");
-      __publicField(this, "statusCode");
-      this.namespace = t, this.name = t === "vectors" ? "StorageVectorsError" : "StorageError", this.status = s, this.statusCode = n;
-    }
-    toJSON() {
-      return { name: this.name, message: this.message, status: this.status, statusCode: this.statusCode };
-    }
-  }, a(_t2, "StorageError"), _t2);
-  function $(r) {
-    return typeof r == "object" && r !== null && "__isStorageError" in r;
-  }
-  a($, "isStorageError");
-  var L = (_u = class extends B {
-    constructor(e, t, s, n = "storage", i) {
-      super(e, n, t, s);
-      __publicField(this, "status");
-      __publicField(this, "statusCode");
-      __publicField(this, "code");
-      this.name = n === "vectors" ? "StorageVectorsApiError" : "StorageApiError", this.status = t, this.statusCode = s, this.code = i;
-    }
-    toJSON() {
-      return { ...super.toJSON(), code: this.code };
-    }
-  }, a(_u, "StorageApiError"), _u), M = (_v = class extends B {
-    constructor(e, t, s = "storage") {
-      super(e, s);
-      __publicField(this, "originalError");
-      this.name = s === "vectors" ? "StorageVectorsUnknownError" : "StorageUnknownError", this.originalError = t;
-    }
-  }, a(_v, "StorageUnknownError"), _v);
-  function C(r, e, t) {
-    let s = { ...r }, n = e.toLowerCase();
-    for (let i of Object.keys(s)) i.toLowerCase() === n && delete s[i];
-    return s[n] = t, s;
-  }
-  a(C, "setHeader");
-  function nt(r) {
-    let e = {};
-    for (let [t, s] of Object.entries(r)) e[t.toLowerCase()] = s;
-    return e;
-  }
-  a(nt, "normalizeHeaders");
-  var it = a((r) => r ? (...e) => r(...e) : (...e) => fetch(...e), "resolveFetch");
-  var ot = a((r) => {
-    if (typeof r != "object" || r === null) return false;
-    let e = Object.getPrototypeOf(r);
-    return (e === null || e === Object.prototype || Object.getPrototypeOf(e) === null) && !(Symbol.toStringTag in r) && !(Symbol.iterator in r);
-  }, "isPlainObject"), fe = a((r) => {
-    if (Array.isArray(r)) return r.map((t) => fe(t));
-    if (typeof r == "function" || r !== Object(r)) return r;
-    let e = {};
-    return Object.entries(r).forEach(([t, s]) => {
-      let n = t.replace(/([-_][a-z])/gi, (i) => i.toUpperCase().replace(/[-_]/g, ""));
-      e[n] = fe(s);
-    }), e;
-  }, "recursiveToCamel");
-  var at = a((r) => r.split("/").map(encodeURIComponent).join("/"), "encodeStoragePath");
-  var ct = a((r) => {
-    if (typeof r == "object" && r !== null) {
-      let e = r;
-      if (typeof e.msg == "string") return e.msg;
-      if (typeof e.message == "string") return e.message;
-      if (typeof e.error_description == "string") return e.error_description;
-      if (typeof e.error == "string") return e.error;
-      if (typeof e.error == "object" && e.error !== null) {
-        let t = e.error;
-        if (typeof t.message == "string") return t.message;
-      }
-    }
-    return JSON.stringify(r);
-  }, "_getErrorMessage"), Gt = a(async (r, e, t, s) => {
-    if (r !== null && typeof r == "object" && "json" in r && typeof r.json == "function") {
-      let i = r, o = parseInt(String(i.status), 10);
-      Number.isFinite(o) || (o = 500), i.json().then((c) => {
-        let u = (c == null ? void 0 : c.statusCode) || (c == null ? void 0 : c.code) || o + "";
-        e(new L(ct(c), o, u, s, c == null ? void 0 : c.code));
-      }).catch(() => {
-        let c = o + "", u = i.statusText || `HTTP ${o} error`;
-        e(new L(u, o, c, s));
-      });
-    } else e(new M(ct(r), r, s));
-  }, "handleError"), Jt = a((r, e, t, s) => {
-    let n = { method: r, headers: (e == null ? void 0 : e.headers) || {} };
-    if (r === "GET" || r === "HEAD" || !s) return { ...n, ...t };
-    if (ot(s)) {
-      let i = (e == null ? void 0 : e.headers) || {}, o;
-      for (let [c, u] of Object.entries(i)) c.toLowerCase() === "content-type" && (o = u);
-      n.headers = C(i, "Content-Type", o != null ? o : "application/json"), n.body = JSON.stringify(s);
-    } else n.body = s;
-    return (e == null ? void 0 : e.duplex) && (n.duplex = e.duplex), { ...n, ...t };
-  }, "_getRequestParams");
-  async function J(r, e, t, s, n, i, o) {
-    return new Promise((c, u) => {
-      r(t, Jt(e, s, n, i)).then((d) => {
-        if (!d.ok) throw d;
-        if (s == null ? void 0 : s.noResolveJson) return d;
-        if (o === "vectors") {
-          let l = d.headers.get("content-type");
-          if (d.headers.get("content-length") === "0" || d.status === 204) return {};
-          if (!l || !l.includes("application/json")) return {};
-        }
-        return d.json();
-      }).then((d) => c(d)).catch((d) => Gt(d, u, s, o));
-    });
-  }
-  a(J, "_handleRequest");
-  function ut(r = "storage") {
-    return { get: a(async (e, t, s, n) => J(e, "GET", t, s, n, void 0, r), "get"), post: a(async (e, t, s, n, i) => J(e, "POST", t, n, i, s, r), "post"), put: a(async (e, t, s, n, i) => J(e, "PUT", t, n, i, s, r), "put"), head: a(async (e, t, s, n) => J(e, "HEAD", t, { ...s, noResolveJson: true }, n, void 0, r), "head"), remove: a(async (e, t, s, n, i) => J(e, "DELETE", t, n, i, s, r), "remove") };
-  }
-  a(ut, "createFetchApi");
-  var Yt = ut("storage"), { get: Te, post: R, put: Oe, head: dt, remove: Ae } = Yt, $s = ut("vectors");
-  var Y = (_w = class {
-    constructor(e, t = {}, s, n = "storage") {
-      __publicField(this, "url");
-      __publicField(this, "headers");
-      __publicField(this, "fetch");
-      __publicField(this, "shouldThrowOnError", false);
-      __publicField(this, "namespace");
-      this.url = e, this.headers = nt(t), this.fetch = it(s), this.namespace = n;
-    }
-    throwOnError() {
-      return this.shouldThrowOnError = true, this;
-    }
-    setHeader(e, t) {
-      return this.headers = C(this.headers, e, t), this;
-    }
-    async handleOperation(e) {
-      try {
-        return { data: await e(), error: null };
-      } catch (t) {
-        if (this.shouldThrowOnError) throw t;
-        if ($(t)) return { data: null, error: t };
-        throw t;
-      }
-    }
-  }, a(_w, "BaseApiClient"), _w);
-  var X = (_x = Symbol.toStringTag, _y = class {
-    constructor(e, t) {
-      __publicField(this, "downloadFn");
-      __publicField(this, "shouldThrowOnError");
-      __publicField(this, _x, "StreamDownloadBuilder");
-      __publicField(this, "promise", null);
-      this.downloadFn = e, this.shouldThrowOnError = t;
-    }
-    then(e, t) {
-      return this.getPromise().then(e, t);
-    }
-    catch(e) {
-      return this.getPromise().catch(e);
-    }
-    finally(e) {
-      return this.getPromise().finally(e);
-    }
-    getPromise() {
-      return this.promise || (this.promise = this.execute()), this.promise;
-    }
-    async execute() {
-      try {
-        return { data: (await this.downloadFn()).body, error: null };
-      } catch (e) {
-        if (this.shouldThrowOnError) throw e;
-        if ($(e)) return { data: null, error: e };
-        throw e;
-      }
-    }
-  }, a(_y, "StreamDownloadBuilder"), _y);
-  var Q = (_z = Symbol.toStringTag, _A = class {
-    constructor(e, t) {
-      __publicField(this, "downloadFn");
-      __publicField(this, "shouldThrowOnError");
-      __publicField(this, _z, "BlobDownloadBuilder");
-      __publicField(this, "promise", null);
-      this.downloadFn = e, this.shouldThrowOnError = t;
-    }
-    asStream() {
-      return new X(this.downloadFn, this.shouldThrowOnError);
-    }
-    then(e, t) {
-      return this.getPromise().then(e, t);
-    }
-    catch(e) {
-      return this.getPromise().catch(e);
-    }
-    finally(e) {
-      return this.getPromise().finally(e);
-    }
-    getPromise() {
-      return this.promise || (this.promise = this.execute()), this.promise;
-    }
-    async execute() {
-      try {
-        return { data: await (await this.downloadFn()).blob(), error: null };
-      } catch (e) {
-        if (this.shouldThrowOnError) throw e;
-        if ($(e)) return { data: null, error: e };
-        throw e;
-      }
-    }
-  }, a(_A, "BlobDownloadBuilder"), _A);
-  var Re = { limit: 100, offset: 0, sortBy: { column: "name", order: "asc" } }, lt = { cacheControl: "3600", contentType: "text/plain;charset=UTF-8", upsert: false }, Z = (_B = class extends Y {
-    constructor(e, t = {}, s, n) {
-      super(e, t, n, "storage");
-      __publicField(this, "bucketId");
-      this.bucketId = s;
-    }
-    async uploadOrUpdate(e, t, s, n) {
-      return this.handleOperation(async () => {
-        let i, o = { ...lt, ...n }, c = { ...this.headers, ...e === "POST" && { "x-upsert": String(o.upsert) } }, u = o.metadata;
-        if (typeof Blob < "u" && s instanceof Blob ? (i = new FormData(), i.append("cacheControl", o.cacheControl), u && i.append("metadata", this.encodeMetadata(u)), i.append("", s)) : typeof FormData < "u" && s instanceof FormData ? (i = s, i.has("cacheControl") || i.append("cacheControl", o.cacheControl), u && !i.has("metadata") && i.append("metadata", this.encodeMetadata(u))) : (i = s, c["cache-control"] = `max-age=${o.cacheControl}`, c["content-type"] = o.contentType, u && (c["x-metadata"] = this.toBase64(this.encodeMetadata(u))), (typeof ReadableStream < "u" && i instanceof ReadableStream || i && typeof i == "object" && "pipe" in i && typeof i.pipe == "function") && !o.duplex && (o.duplex = "half")), n == null ? void 0 : n.headers) for (let [g, y] of Object.entries(n.headers)) c = C(c, g, y);
-        let d = this._removeEmptyFolders(t), l = this._getFinalPath(d), f = await (e == "PUT" ? Oe : R)(this.fetch, `${this.url}/object/${l}`, i, { headers: c, ...(o == null ? void 0 : o.duplex) ? { duplex: o.duplex } : {} });
-        return { path: d, id: f.Id, fullPath: f.Key };
-      });
-    }
-    async upload(e, t, s) {
-      return this.uploadOrUpdate("POST", e, t, s);
-    }
-    async uploadToSignedUrl(e, t, s, n) {
-      let i = this._removeEmptyFolders(e), o = this._getFinalPath(i), c = new URL(this.url + `/object/upload/sign/${o}`);
-      return c.searchParams.set("token", t), this.handleOperation(async () => {
-        let u, d = { ...lt, ...n }, l = { ...this.headers, "x-upsert": String(d.upsert) }, f = d.metadata;
-        if (typeof Blob < "u" && s instanceof Blob ? (u = new FormData(), u.append("cacheControl", d.cacheControl), f && u.append("metadata", this.encodeMetadata(f)), u.append("", s)) : typeof FormData < "u" && s instanceof FormData ? (u = s, u.has("cacheControl") || u.append("cacheControl", d.cacheControl), f && !u.has("metadata") && u.append("metadata", this.encodeMetadata(f))) : (u = s, l["cache-control"] = `max-age=${d.cacheControl}`, l["content-type"] = d.contentType, f && (l["x-metadata"] = this.toBase64(this.encodeMetadata(f))), (typeof ReadableStream < "u" && u instanceof ReadableStream || u && typeof u == "object" && "pipe" in u && typeof u.pipe == "function") && !d.duplex && (d.duplex = "half")), n == null ? void 0 : n.headers) for (let [y, se] of Object.entries(n.headers)) l = C(l, y, se);
-        let g = await Oe(this.fetch, c.toString(), u, { headers: l, ...(d == null ? void 0 : d.duplex) ? { duplex: d.duplex } : {} });
-        return { path: i, fullPath: g.Key };
-      });
-    }
-    async createSignedUploadUrl(e, t) {
-      return this.handleOperation(async () => {
-        let s = this._getFinalPath(e), n = { ...this.headers };
-        (t == null ? void 0 : t.upsert) && (n["x-upsert"] = "true");
-        let i = await R(this.fetch, `${this.url}/object/upload/sign/${s}`, {}, { headers: n }), o = new URL(this.url + i.url), c = o.searchParams.get("token");
-        if (!c) throw new B("No token returned by API");
-        return { signedUrl: o.toString(), path: e, token: c };
-      });
-    }
-    async update(e, t, s) {
-      return this.uploadOrUpdate("PUT", e, t, s);
-    }
-    async move(e, t, s) {
-      return this.handleOperation(async () => await R(this.fetch, `${this.url}/object/move`, { bucketId: this.bucketId, sourceKey: e, destinationKey: t, destinationBucket: s == null ? void 0 : s.destinationBucket }, { headers: this.headers }));
-    }
-    async copy(e, t, s) {
-      return this.handleOperation(async () => ({ path: (await R(this.fetch, `${this.url}/object/copy`, { bucketId: this.bucketId, sourceKey: e, destinationKey: t, destinationBucket: s == null ? void 0 : s.destinationBucket }, { headers: this.headers })).Key }));
-    }
-    async createSignedUrl(e, t, s) {
-      return this.handleOperation(async () => {
-        let n = this._getFinalPath(e), i = typeof (s == null ? void 0 : s.transform) == "object" && s.transform !== null && Object.keys(s.transform).length > 0, o = await R(this.fetch, `${this.url}/object/sign/${n}`, { expiresIn: t, ...i ? { transform: s.transform } : {} }, { headers: this.headers }), c = new URLSearchParams();
-        (s == null ? void 0 : s.download) && c.set("download", s.download === true ? "" : s.download), (s == null ? void 0 : s.cacheNonce) != null && c.set("cacheNonce", String(s.cacheNonce));
-        let u = c.toString();
-        return { signedUrl: encodeURI(`${this.url}${o.signedURL}${u ? `&${u}` : ""}`) };
-      });
-    }
-    async createSignedUrls(e, t, s) {
-      return this.handleOperation(async () => {
-        let n = await R(this.fetch, `${this.url}/object/sign/${this.bucketId}`, { expiresIn: t, paths: e }, { headers: this.headers }), i = new URLSearchParams();
-        (s == null ? void 0 : s.download) && i.set("download", s.download === true ? "" : s.download), (s == null ? void 0 : s.cacheNonce) != null && i.set("cacheNonce", String(s.cacheNonce));
-        let o = i.toString();
-        return n.map((c) => ({ ...c, signedUrl: c.signedURL ? encodeURI(`${this.url}${c.signedURL}${o ? `&${o}` : ""}`) : null }));
-      });
-    }
-    download(e, t, s) {
-      let i = typeof (t == null ? void 0 : t.transform) == "object" && t.transform !== null && Object.keys(t.transform).length > 0 ? "render/image/authenticated" : "object", o = new URLSearchParams();
-      (t == null ? void 0 : t.transform) && this.applyTransformOptsToQuery(o, t.transform), (t == null ? void 0 : t.cacheNonce) != null && o.set("cacheNonce", String(t.cacheNonce));
-      let c = o.toString(), u = this._getFinalPath(e), d = a(() => Te(this.fetch, `${this.url}/${i}/${u}${c ? `?${c}` : ""}`, { headers: this.headers, noResolveJson: true }, s), "downloadFn");
-      return new Q(d, this.shouldThrowOnError);
-    }
-    async info(e) {
-      let t = this._getFinalPath(e);
-      return this.handleOperation(async () => {
-        let s = await Te(this.fetch, `${this.url}/object/info/${t}`, { headers: this.headers });
-        return fe(s);
-      });
-    }
-    async exists(e) {
-      var _a2;
-      let t = this._getFinalPath(e);
-      try {
-        return await dt(this.fetch, `${this.url}/object/${t}`, { headers: this.headers }), { data: true, error: null };
-      } catch (s) {
-        if (this.shouldThrowOnError) throw s;
-        if ($(s)) {
-          let n = s instanceof L ? s.status : s instanceof M ? (_a2 = s.originalError) == null ? void 0 : _a2.status : void 0;
-          if (n !== void 0 && [400, 404].includes(n)) return { data: false, error: s };
-        }
-        throw s;
-      }
-    }
-    getPublicUrl(e, t) {
-      let s = this._getFinalPath(e), n = new URLSearchParams();
-      (t == null ? void 0 : t.download) && n.set("download", t.download === true ? "" : t.download), (t == null ? void 0 : t.transform) && this.applyTransformOptsToQuery(n, t.transform), (t == null ? void 0 : t.cacheNonce) != null && n.set("cacheNonce", String(t.cacheNonce));
-      let i = n.toString(), c = typeof (t == null ? void 0 : t.transform) == "object" && t.transform !== null && Object.keys(t.transform).length > 0 ? "render/image" : "object";
-      return { data: { publicUrl: encodeURI(`${this.url}/${c}/public/${s}`) + (i ? `?${i}` : "") } };
-    }
-    async remove(e) {
-      return this.handleOperation(async () => await Ae(this.fetch, `${this.url}/object/${this.bucketId}`, { prefixes: e }, { headers: this.headers }));
-    }
-    async purgeCache(e, t, s) {
-      return this.handleOperation(async () => {
-        let n = at(this._getFinalPath(e)), i = new URLSearchParams();
-        (t == null ? void 0 : t.transformations) && i.set("transformations", "true");
-        let o = i.toString();
-        return await Ae(this.fetch, `${this.url}/cdn/${n}${o ? `?${o}` : ""}`, {}, { headers: this.headers }, s);
-      });
-    }
-    async list(e, t, s) {
-      return this.handleOperation(async () => {
-        let n = (t == null ? void 0 : t.sortBy) ? { ...Re.sortBy, ...t.sortBy } : Re.sortBy, i = { ...Re, ...t, sortBy: n, prefix: e || "" };
-        return await R(this.fetch, `${this.url}/object/list/${this.bucketId}`, i, { headers: this.headers }, s);
-      });
-    }
-    async listV2(e, t) {
-      return this.handleOperation(async () => {
-        let s = { ...e };
-        return await R(this.fetch, `${this.url}/object/list-v2/${this.bucketId}`, s, { headers: this.headers }, t);
-      });
-    }
-    encodeMetadata(e) {
-      return JSON.stringify(e);
-    }
-    toBase64(e) {
-      return typeof Buffer < "u" ? Buffer.from(e).toString("base64") : btoa(e);
-    }
-    _getFinalPath(e) {
-      return `${this.bucketId}/${e.replace(/^\/+/, "")}`;
-    }
-    _removeEmptyFolders(e) {
-      return e.replace(/^\/|\/$/g, "").replace(/\/+/g, "/");
-    }
-    applyTransformOptsToQuery(e, t) {
-      return t.width && e.set("width", t.width.toString()), t.height && e.set("height", t.height.toString()), t.resize && e.set("resize", t.resize), t.format && e.set("format", t.format), t.quality && e.set("quality", t.quality.toString()), e;
-    }
-  }, a(_B, "StorageFileApi"), _B);
-  var ht = "2.112.3";
-  var ft = { "X-Client-Info": `storage-js/${ht}` };
-  var q = "runtime", pe = 600, me = 3600, b = (_C = class extends Error {
-    constructor(e) {
-      super(e), this.name = "CloudStoragePathError";
-    }
-  }, a(_C, "CloudStoragePathError"), _C), ee = (_D = Symbol.toStringTag, _E = class {
-    constructor(e, t) {
-      __publicField(this, "blob");
-      __publicField(this, "stream");
-      __publicField(this, _D, "WorkBuddyStorageDownload");
-      this.blob = e, this.stream = t;
-    }
-    asStream() {
-      return this.stream();
-    }
-    then(e, t) {
-      return this.blob().then(e, t);
-    }
-    catch(e) {
-      return this.blob().catch(e);
-    }
-    finally(e) {
-      return this.blob().finally(e);
-    }
-  }, a(_E, "WorkBuddyStorageDownload"), _E), H = (_F = class {
-    constructor(e) {
-      __publicField(this, "fileApi");
-      this.fileApi = e;
-    }
-    upload(e, t, s) {
-      return P(this.fileApi.upload(v(e), t, s));
-    }
-    update(e, t, s) {
-      return P(this.fileApi.update(v(e), t, s));
-    }
-    list(e = "", t) {
-      return P(this.fileApi.list(mt(e), t));
-    }
-    listPage(e) {
-      var _a2;
-      return P(this.fileApi.listV2({ ...e, prefix: mt((_a2 = e == null ? void 0 : e.prefix) != null ? _a2 : "") }));
-    }
-    info(e) {
-      return P(this.fileApi.info(v(e)));
-    }
-    async exists(e) {
-      let t = await this.fileApi.exists(v(e));
-      return t.error ? { data: null, error: bt(t.error) } : { data: t.data, error: null };
-    }
-    download(e) {
-      let t = this.fileApi.download(v(e));
-      return new ee(() => P(t), () => P(t.asStream()));
-    }
-    remove(e) {
-      if (e.length === 0) throw new b("remove requires at least one object path.");
-      return P(this.fileApi.remove(e.map(v)));
-    }
-    copy(e, t) {
-      return P(this.fileApi.copy(v(e), v(t)));
-    }
-    move(e, t) {
-      return P(this.fileApi.move(v(e), v(t)));
-    }
-    createSignedUrl(e, t = pe) {
-      return P(this.fileApi.createSignedUrl(v(e), gt(t)));
-    }
-    createSignedUrls(e, t = pe) {
-      if (e.length === 0) throw new b("createSignedUrls requires at least one object path.");
-      return P(this.fileApi.createSignedUrls(e.map(v), gt(t)));
-    }
-    createSignedUploadUrl(e, t) {
-      var _a2;
-      return P(this.fileApi.createSignedUploadUrl(v(e), { upsert: (_a2 = t == null ? void 0 : t.upsert) != null ? _a2 : false }));
-    }
-    uploadToSignedUrl(e, t, s, n) {
-      if (!t) throw new b("signed upload token is required.");
-      return P(this.fileApi.uploadToSignedUrl(v(e), t, s, n));
-    }
-  }, a(_F, "WorkBuddyStorageBucket"), _F), te = (_G = class extends H {
-    constructor(e) {
-      let s = e.from(q);
-      super(s);
-      __publicField(this, "runtime");
-      this.runtime = new H(s);
-    }
-    from(e = q) {
-      if (e !== q) throw new b(`Only the "${q}" storage bucket is available.`);
-      return this.runtime;
-    }
-    userPath(e, t) {
-      return pt("users", e, t);
-    }
-    sharedPath(e, t) {
-      return pt("shared", e, t);
-    }
-  }, a(_G, "WorkBuddyStorageModule"), _G);
-  function yt(r, e) {
-    let t = { from: a((s) => new Z(`${r.endpoint}${A.storage}`, ft, s, e), "from") };
-    return new te(t);
-  }
-  a(yt, "createStorageModule");
-  function pt(r, e, t) {
-    let s = Xt(e, "owner/user id"), n = $e(t, false);
-    return v(`${r}/${s}/${n}`);
-  }
-  a(pt, "scopedPath");
-  function v(r) {
-    let e = $e(r, false);
-    if (!e.includes("/")) throw new b("Object paths must use users/<uid>/... or shared/<ownerUid>/....");
-    let [t, s, ...n] = e.split("/");
-    if (t !== "users" && t !== "shared" || !s || n.length === 0) throw new b("Object paths must use users/<uid>/... or shared/<ownerUid>/....");
-    return e;
-  }
-  a(v, "validateObjectPath");
-  function mt(r) {
-    if (r === "") return "";
-    let e = $e(r, true), [t, s] = e.split("/");
-    if (t === "shared" && !s) return "shared";
-    if (t !== "users" && t !== "shared" || !s) throw new b("List prefixes must start with users/<uid> or shared/<ownerUid>.");
-    return e;
-  }
-  a(mt, "validateObjectPrefix");
-  function $e(r, e) {
-    if (typeof r != "string" || r.trim() === "") throw new b("Storage path must be a non-empty relative path.");
-    let t = r.trim();
-    for (let i = 0; i < 3; i += 1) try {
-      let o = decodeURIComponent(t);
-      if (o === t) break;
-      t = o;
-    } catch {
-      throw new b("Storage path contains invalid URL encoding.");
-    }
-    if (t.startsWith("/") || t.includes("\\") || t.includes("\0") || t.includes("//") || !e && t.endsWith("/")) throw new b("Storage path is not a safe relative object path.");
-    let s = e ? t.replace(/\/+$/, "") : t;
-    if (s.split("/").some((i) => i === "" || i === "." || i === "..")) throw new b("Storage path traversal is not allowed.");
-    return s;
-  }
-  a($e, "validatePath");
-  function Xt(r, e) {
-    if (!r) throw new b(`${e} is not a valid storage path segment.`);
-    let t = r;
-    for (let s = 0; s < 3; s += 1) try {
-      let n = decodeURIComponent(t);
-      if (n === t) break;
-      t = n;
-    } catch {
-      throw new b(`${e} contains invalid URL encoding.`);
-    }
-    if (t.includes("/") || t.includes("\\") || t.includes("\0") || t === "." || t === "..") throw new b(`${e} is not a valid storage path segment.`);
-    return t;
-  }
-  a(Xt, "validatePathSegment");
-  function gt(r) {
-    if (!Number.isInteger(r) || r <= 0 || r > me) throw new b(`Signed URL expiry must be an integer between 1 and ${me} seconds.`);
-    return r;
-  }
-  a(gt, "validateSignedURLTTL");
-  async function P(r) {
-    let e = await r;
-    return e.error ? { data: null, error: bt(e.error) } : e.data === null ? { data: null, error: { name: "CloudStorageResponseError", message: "Storage API returned neither data nor an error." } } : { data: e.data, error: null };
-  }
-  a(P, "mapStorageResult");
-  function bt(r) {
-    if (r instanceof Error) {
-      let e = r;
-      return { name: e.name, message: e.message, status: e.status, statusCode: e.statusCode, code: e.code, cause: r };
-    }
-    return { name: "CloudStorageError", message: String(r), cause: r };
-  }
-  a(bt, "normalizeStorageError");
-  var re = (_H = class {
-    constructor(e, t = {}) {
-      __publicField(this, "config");
-      __publicField(this, "database");
-      __publicField(this, "auth");
-      __publicField(this, "storage");
-      __publicField(this, "llm");
-      this.config = e, this.auth = new D(e, ye(e, ie), { storage: t.storage });
-      let s = ye(e, () => this.auth.getAccessToken());
-      this.database = Je(e, s), this.storage = yt(e, s), this.llm = new F(e, s);
-    }
-    get endpoint() {
-      return this.config.endpoint;
-    }
-    get oauthRelayBaseUrl() {
-      return this.config.oauthRelayBaseUrl;
-    }
-  }, a(_H, "WorkBuddyCloudClient"), _H);
-  function wt(r) {
-    return new re(Le(r), { storage: r.storage });
-  }
-  a(wt, "createWorkBuddyCloud");
-  function St(r) {
-    return r.kind === "unauthenticated" || r.code === "invalid_grant";
-  }
-  a(St, "shouldClearCredentials");
-  return _t(Qt);
-})();
-
-</script>
 <script>
 (function(){
 "use strict";
@@ -2345,72 +360,86 @@ var PUB = {
 
 /* 浏览模式数据快照（云能力不可用时展示） */
 var FALLBACK_COURSES = [{"code":"weave-40","title":"织网体验课 · 轻体验","cat":"weave","cat_label":"织网体验","duration":"40 分钟","price_cents":4000,"deliverable":"小渔网挂件 1 个","audience":"亲子家庭、散客、研学团","highlights":["认识渔网与织网工具","基础平结与网眼成形","在临湖广场跟着渔嫂学，完成即可带走"],"venue":"桑园村临湖广场织网体验区","notice":"每场 20 人。建议提前 10 分钟到场；儿童需家长陪同。","image":"assets/img/k_weave40.jpg","sort_no":1,"unit":"人","slot_hint":"40 分钟 · 每场 20 人","season":null,"brief":"四十分钟学会基础平结与网眼成形，跟渔嫂亲手结出第一张网，成品可以带走。","itinerary":["村史馆集合，看老渔网与旧时捕鱼木船","认识渔网与织网工具，看渔嫂演示平结","动手：平结与网眼成形，渔嫂一对一指正","收口完成，在牌坊前拍照打卡"],"mentor":"桑园村织网渔嫂导师（由村内经验丰富的渔嫂担任）","faq":["零基础能来吗||可以。全程由渔嫂手把手示范，不需要任何基础。","小朋友可以参加吗||建议 6 岁以上，需家长陪同完成。","下雨天怎么办||吹风下雨会改到村史馆室内区，或统一改期。"],"active":true},{"code":"weave-98","title":"织网体验课 · 标准课","cat":"weave","cat_label":"织网体验","duration":"2 小时","price_cents":9800,"deliverable":"织网作品 1 件 + 渔网文化手册","audience":"亲子家庭、散客、研学团","highlights":["完整织网流程实操（起头、打结、收口）","渔网功能与文化讲解","作品完成后可带走"],"venue":"桑园村临湖广场织网体验区","notice":"每场 20 人。含材料与工具；建议穿耐脏衣物。","image":"assets/img/k_weave98.jpg","sort_no":2,"unit":"人","slot_hint":"2 小时 · 每场 20 人","season":null,"brief":"两小时走完起头、打结、收口的完整织网流程，加一堂渔网功能与文化讲解。","itinerary":["村史馆导入：东平湖渔猎文化与织网技艺","起头：固定网纲、起第一个网眼","打结与网眼成形：按尺寸逐圈放目","收口：收边成网，作品带走"],"mentor":"桑园村织网渔嫂导师（由村内经验丰富的渔嫂担任）","faq":["需要自己准备材料吗||不需要。材料与工具均由体验区提供。","会弄脏衣服吗||会接触到麻绳与木架，建议穿耐脏衣物。"],"active":true},{"code":"weave-228","title":"织网体验课 · 深度课","cat":"weave","cat_label":"织网体验","duration":"半天（约 3 小时）","price_cents":22800,"deliverable":"定制渔网装置 1 件 + 结业证书","audience":"研学团、企业团建、深度体验者","highlights":["从桑树皮到渔网：材料演变","渔猎文化专题讲解","独立完成一件定制渔网装置"],"venue":"桑园村村史馆 + 临湖广场织网体验区","notice":"每场 20 人。含村史馆讲解、材料与证书。","image":"assets/img/k_weave228.jpg","sort_no":3,"unit":"人","slot_hint":"半天 · 每场 20 人","season":null,"brief":"半天课，从桑树皮到渔网看清材料演变，独立完成一件定制渔网装置。","itinerary":["村史馆专题：从桑树皮到渔网的材料演变","渔猎文化专题讲解：水系、渔具与渔家谚语","独立编制：自选规格，完成定制渔网装置","结业颁证与合影"],"mentor":"桑园村织网渔嫂导师 + 渔文化讲解员","faq":["结业证书有什么用途||作为本次参与非遗技艺承习的凭证，可用于研学实践记录。","定制装置能带走吗||可以，完成后当场移交，体积较大时会协助打包。"],"active":true},{"code":"study-1d","title":"渔猎研学 · 一日研学","cat":"study","cat_label":"渔猎研学","duration":"1 天（4 课时）","price_cents":12800,"deliverable":"研学手册 + 结业证明","audience":"中小学研学团、高校实践团","highlights":["渔猎文化溯源：黄河、大汶河与京杭大运河","织网技艺承习","生态渔业科普：48 种经济鱼类与青头潜鸭"],"venue":"桑园村 + 安山古镇（运河文化馆）","notice":"15 人以上成团；可按团队规模增配导师。","image":"assets/img/k_study1d.jpg","sort_no":4,"unit":"人","slot_hint":"1 天 · 15 人成团","season":null,"brief":"一整天四课时，把渔猎文化、织网承习、生态渔业科普串成一条完整研学线。","itinerary":["渔猎文化溯源（1.5 小时）：黄河、大汶河与京杭大运河的水系关系","织网技艺承习（2 小时）：全流程实操与渔网种类认知","生态渔业科普（1.5 小时）：48 种经济鱼类与青头潜鸭","研学小结与结业证明发放"],"mentor":"渔猎文化讲解员 + 村内织网导师","faq":["几个学生配一个老师||按 1 名导师对 15 名学员配置，可根据团队规模增配导师。","课程能对接学校劳育要求吗||课程模块按劳动教育与综合实践活动设计，可提供课程提纲与结业证明。"],"active":true},{"code":"study-2d","title":"渔猎研学 · 两日研学","cat":"study","cat_label":"渔猎研学","duration":"2 天（8 课时，含渔家住宿）","price_cents":32800,"deliverable":"研学报告 + 结业证","audience":"中小学研学团、高校实践团","highlights":["一日研学全部内容","渔家宴参与式制作与湖鲜认知","渔家民宿住宿一晚"],"venue":"桑园村 + 安山古镇 + 塘坊村","notice":"15 人以上成团；含渔家住宿与餐食。","image":"assets/img/k_study2d.jpg","sort_no":5,"unit":"人","slot_hint":"2 天 · 15 人成团","season":null,"brief":"两天八课时，第一天研学、第二天渔家宴与渔家住宿，形成吃住学完整闭环。","itinerary":["第一天：渔猎文化溯源 + 织网承习 + 生态渔业科普","第一天晚：入住塘坊村渔家民宿","第二天：渔家宴参与式制作与湖鲜认知","第二天：安山古镇运河文化馆研学，结业发证"],"mentor":"渔猎文化讲解员 + 渔家宴厨艺导师","faq":["住宿是几人一间||入住塘坊村独立客房，按标间或三人间安排，具体以出行前确认为准。","餐饮有忌口怎么办||可在下单备注中写明，会按需调整菜品。"],"active":true},{"code":"study-camp","title":"渔猎研学 · 主题营","cat":"study","cat_label":"渔猎研学","duration":"3 天（含渔村微调研）","price_cents":88000,"deliverable":"渔村微调研报告 + 结业证","audience":"高校实践团、深度研学团","highlights":["一日、两日研学全部内容","以真实渔村为对象的调研方法训练","问卷设计、访谈技巧与数据整理"],"venue":"桑园村 + 安山古镇 + 塘坊村","notice":"15 人以上成团；建议 4—6 人一组。","image":"assets/img/k_studycamp.jpg","sort_no":6,"unit":"人","slot_hint":"3 天 · 15 人成团","season":null,"brief":"三天主题营，以真实渔村为调研对象，训练问卷设计、访谈技巧与数据整理。","itinerary":["前两天：一日研学与两日研学全部内容","第三天上午：调研方法训练（问卷设计、访谈技巧）","第三天下午：分组进村微调研，数据整理与汇报","渔村微调研报告 + 结业证"],"mentor":"研学导师 + 现场联络人","faq":["调研对象是真实的村民吗||是。以桑园村、安山古镇、塘坊村的渔民与经营者为真实调研对象。","几人一组||建议 4—6 人一组，每组配 1 名指导老师。"],"active":true},{"code":"feast-fast","title":"渔家宴 · 湖鲜快餐","cat":"feast","cat_label":"渔家宴","duration":"即点即食（约 30 分钟）","price_cents":3800,"deliverable":"湖鲜套餐 1 份（含主食）","audience":"散客、过路游客、单人出行","highlights":["当日湖鲜、明厨亮灶","一荤一素一汤的标准配餐，出餐快","面向散客快速周转，花费少"],"venue":"安山古镇 · 渔家餐馆区","notice":"食材以当日到货为准；旺季建议提前预约。","image":"assets/img/k_feastfast.jpg","sort_no":7,"unit":"人","slot_hint":"约 30 分钟 · 每场 60 位","season":null,"brief":"安山古镇的湖鲜快餐：当日湖鲜、明厨亮灶，出餐快、花费少。","itinerary":["前台核销订单，领取餐位","按当日湖鲜配餐出餐","用餐后可在古镇老房台片区散步"],"mentor":"本地渔家厨师","faq":["能加菜吗||可以，现场按菜单追加，另行结算。","有素食吗||可提供素菜配餐，下单时在备注中说明即可。"],"active":true},{"code":"feast-std","title":"渔家宴 · 标准席","cat":"feast","cat_label":"渔家宴","duration":"约 90 分钟","price_cents":12800,"deliverable":"标准席 1 位（主菜 + 配菜 + 特色主食）","audience":"家庭出游、朋友聚餐、团队用餐","highlights":["8 道工序标准出品：食材验收、暂养净化、刀工处理、火候控制、调味配比、装盘呈现、上菜时效、餐后回访","湖鲜溯源 + 明厨亮灶，扫码可知产地与检测信息","东平湖鲤鱼、大青虾等国家地理标志与有机认证水产品"],"venue":"安山古镇 · 渔家宴标准席餐厅","notice":"10 人以上可预约包席；统一菜单、统一出品标准、统一结算。","image":"assets/img/k_feaststd.jpg","sort_no":8,"unit":"人","slot_hint":"90 分钟 · 每场 80 位","season":null,"brief":"用 8 道工序标准把渔家饭做成渔家宴，湖鲜溯源、明厨亮灶。","itinerary":["验收：当日湖鲜、有机认证凭证核验","暂养净化 → 刀工处理 → 火候控制","调味配比 → 装盘呈现 → 按序上菜","餐后回访，反馈进入数字台账"],"mentor":"本地渔家厨师团队","faq":["8 道工序是什么||食材验收、暂养净化、刀工处理、火候控制、调味配比、装盘呈现、上菜时效、餐后回访。","能吃到什么鱼||以东平湖鲤鱼、大青虾、四大家鱼为主，随当日到货调整。"],"active":true},{"code":"feast-full","title":"全鱼宴 · 主题席","cat":"feast","cat_label":"渔家宴","duration":"约 120 分钟","price_cents":26800,"deliverable":"全鱼宴 1 位（以鱼为主材的多道菜品）","audience":"宴请、节庆聚餐、商务接待","highlights":["以东平湖全鱼宴为特色的主题席","同一尾湖鲜按部位分档做成多道菜，宴请场面足","需提前 1 天预约，按人数配菜"],"venue":"安山古镇 · 全鱼宴主题厅","notice":"需提前 1 天预约；菜品随当日湖鲜调整。","image":"assets/img/k_feastfull.jpg","sort_no":9,"unit":"人","slot_hint":"120 分钟 · 每场 40 位","season":null,"brief":"宴请与节庆用的主题席，以东平湖全鱼宴为核心，一鱼多吃。","itinerary":["提前 1 天预约确认人数与忌口","当日验货、暂养净化","按部位分档：头尾、中段、鱼骨分别入菜","分道呈现，配渔家主食收尾"],"mentor":"本地渔家厨师长","faq":["多少位起订||建议 6 位起订，便于按部位分档做菜。","能开发票吗||可以，下单时在备注写明抬头即可。"],"active":true},{"code":"stay-loft","title":"塘坊 · LOFT 公寓","cat":"stay","cat_label":"渔家住宿","duration":"1 晚（14:00 入住 / 次日 12:00 退房）","price_cents":38800,"deliverable":"LOFT 公寓 1 套 · 含双早","audience":"情侣、朋友结伴、家庭出游","highlights":["由旧房屋提升改造而来，保留渔家院落元素","湖景 + 静谧康养定位，与景区酒店形成差异化","全院共 8 套，配套会议室（可容纳 50 余人）与露天游泳池"],"venue":"塘坊村四星级民宿区 · LOFT 公寓","notice":"共 8 套，旺季建议提前预订。","image":"assets/img/k_stayloft.jpg","sort_no":10,"unit":"间·晚","slot_hint":"每场 8 间 · 按晚预订","season":null,"brief":"住在渔村里而不是景区里：LOFT 公寓 8 套，湖景与静谧康养。","itinerary":["14:00 前台核销入住","房间与公共区交付（含露天游泳池、会议室）","次日 12:00 前退房"],"mentor":"本村资深民宿管家","faq":["可以带宠物吗||暂不支持携带宠物入住。","能加床吗||LOFT 公寓可加 1 个地铺，下单时备注说明即可。"],"active":true},{"code":"stay-yard","title":"屯顶石屋 · 特色四合院","cat":"stay","cat_label":"渔家住宿","duration":"1 晚（14:00 入住 / 次日 12:00 退房）","price_cents":128000,"deliverable":"东平屯顶石屋四合院 1 院（整院）· 含早餐","audience":"家庭团聚、小团队、拍摄团队","highlights":["东平屯顶石屋特色四合院，保留渔家院落原貌","融入古朴木船、二十四节气主题展示、鸟类科普角等渔家元素","全院仅 1 套，整院独享"],"venue":"塘坊村 · 东平屯顶石屋特色四合院","notice":"全院仅 1 套，需提前预订。","image":"assets/img/k_stayyard.jpg","sort_no":11,"unit":"院·晚","slot_hint":"整院 1 套 · 按晚预订","season":null,"brief":"塘坊村唯一一套东平屯顶石屋四合院，保留原貌，整院独享。","itinerary":["14:00 入院核销","四合院参观讲解：古朴木船、二十四节气展示、鸟类科普角","次日 12:00 前退院"],"mentor":"本村资深民宿管家","faq":["能住多少人||按院落格局接待，建议 6—10 人，具体以确认信息为准。","可以拍摄吗||可以，商业拍摄需提前沟通。"],"active":true},{"code":"stay-room","title":"塘坊 · 独立房间","cat":"stay","cat_label":"渔家住宿","duration":"1 晚（14:00 入住 / 次日 12:00 退房）","price_cents":22800,"deliverable":"独立客房 1 间 · 含双早","audience":"散客、研学团、骑行与自驾游客","highlights":["塘坊村四星级民宿，共 22 间独立客房","距大宋不夜城约 5 分钟车程，紧邻景区","配套会议室（可容纳 50 余人）"],"venue":"塘坊村四星级民宿区 · 独立客房","notice":"共 22 间，可整包。","image":"assets/img/k_stayroom.jpg","sort_no":12,"unit":"间·晚","slot_hint":"每场 22 间 · 按晚预订","season":null,"brief":"塘坊村 22 间独立客房，距大宋不夜城约 5 分钟车程。","itinerary":["14:00 前台核销入住","客房门卡与早餐券交付","次日 12:00 前退房"],"mentor":"本村资深民宿管家","faq":["团队能整包吗||可以，研学团与团队可整包，下单后由客服为您单独排房。","有停车场吗||有，可停放自驾车辆，旺季按现场指引停车。"],"active":true},{"code":"show-osprey","title":"鱼鹰捕鱼表演","cat":"show","cat_label":"渔村演艺","duration":"约 40 分钟","price_cents":5800,"deliverable":"观演席位 1 个（含近距离互动与拍摄环节）","audience":"大众游客、亲子家庭、摄影爱好者","highlights":["塘坊村保有东平湖地区唯一的鱼鹰驯养文化传承","定时定点表演场次，不是碰运气的偶遇","表演设互动环节，可近距离拍摄"],"venue":"塘坊村鱼鹰表演点","notice":"受天气与水位影响，遇恶劣天气顺延。","image":"assets/img/k_showosprey.jpg","sort_no":13,"unit":"人","slot_hint":"40 分钟 · 每场 80 位 · 定时定点","season":null,"brief":"东平湖地区唯一的鱼鹰驯养技艺，定时定点开演，演后可见面互动。","itinerary":["按场次集合，工作人员指引就位","鱼鹰出船、潜水捕鱼实景表演","渔夫讲解驯养与渔猎习俗","近距离互动与拍摄"],"mentor":"塘坊村鱼鹰驯养传承人","faq":["表演是每天都有吗||按本页公示场次进行，每天 10:00 与 15:00 两场。","能拍到好照片吗||表演设近距离互动时段，建议带长焦镜头。"],"active":true},{"code":"show-open","title":"开湖节观礼 · 千帆竞发","cat":"show","cat_label":"渔村演艺","duration":"约半天","price_cents":9800,"deliverable":"观礼席位 1 个（含码头讲解与拍摄位引导）","audience":"大众游客、摄影爱好者","highlights":["开渔仪式观礼与千帆竞发实景体验","商老庄乡大安山码头是开渔主要码头，近千艘渔船同时启航","开湖节配套活动，当地标志性活动"],"venue":"商老庄乡大安山码头","notice":"季节限定。9 月 1 日为主场次，开湖季期间按实际开湖安排加场。","image":"assets/img/k_showopen.jpg","sort_no":14,"unit":"人","slot_hint":"半天 · 每场 200 位 · 开湖季限定","season":"季节限定 · 开湖季（9—11 月）","brief":"季节限定：开渔仪式观礼、千帆竞发实景体验，把 9 月 1 日开湖这件事看个够。","itinerary":["码头集合，讲东平湖封湖禁渔与开渔制度","近千艘渔船启航，千帆竞发实景观礼","开湖节配套活动体验","自由拍摄与古镇用餐"],"mentor":"大安山码头现场讲解员","faq":["不是 9 月 1 日来也能看吗||开湖季期间按实际开湖安排加场，场次以本页公示为准。","能上船吗||观礼在码头安全区进行，不上船，不进入作业水域。"],"active":true},{"code":"craft-lamp","title":"渔网灯罩手作课","cat":"craft","cat_label":"非遗手作","duration":"约 2 小时","price_cents":12900,"deliverable":"渔网灯罩 1 件","audience":"情侣、朋友结伴、亲子家庭","highlights":["提取渔网的结构语言，做成日常可用的灯罩","手工制作，可送礼也可自用","由织网渔嫂与手作指导共同带课，保留手工痕迹"],"venue":"桑园村临湖广场织网体验区","notice":"含材料与工具；成品可当场带走。","image":"assets/img/k_craftlamp.jpg","sort_no":15,"unit":"人","slot_hint":"2 小时 · 每场 16 人","season":null,"brief":"把渔网的结法变成一盏灯：灯罩手作课，属织网手作系列。","itinerary":["看样品：小渔网挂件、灯罩、收纳篮、杯垫","选型与配色，讲渔网结法与结构语言","动手编织灯罩，导师逐个指导","通电试亮，成品带走"],"mentor":"桑园村织网渔嫂 + 手作指导","faq":["需要手工基础吗||不需要，结法由导师拆成几步示范。","灯罩能直接用吗||配标准灯座即可使用，现场会试亮。"],"active":true},{"code":"craft-basket","title":"渔网收纳篮手作课","cat":"craft","cat_label":"非遗手作","duration":"约 90 分钟","price_cents":9900,"deliverable":"渔网收纳篮 1 件","audience":"游客、伴手礼购买者、亲子家庭","highlights":["同日用品结合：编完立刻能用来收纳","手工制作，结实耐用","与灯罩课共用一套渔网结法，两节课可叠加修读"],"venue":"桑园村临湖广场织网体验区","notice":"含材料与工具；成品可当场带走。","image":"assets/img/k_craftbasket.jpg","sort_no":16,"unit":"人","slot_hint":"90 分钟 · 每场 16 人","season":null,"brief":"九十分钟编出一个渔网收纳篮，编完就能用。","itinerary":["讲解渔网结法与篮体结构","起底：编出篮底","立壁与收口","装拎手，成品带走"],"mentor":"桑园村织网渔嫂","faq":["能装水吗||不建议装水，适合收纳杂物与桌面小物。","适合几岁孩子||建议 8 岁以上，需家长协助起底。"],"active":true}];
-/* ---- 云端能力兜底 ----
-   云 SDK 需要较新的 JS 引擎；个别环境（如旧版 iOS Safari）可能解析失败。
-   先尝试备用脚本来源（本地 / CDN），任一成功即自动重载；
-   若最终仍不可用，则进入「浏览模式」：页面照常展示，但暂不能下单与登录。 */
-var OFFLINE = !window.WorkBuddyCloud;
-var RT_KEY = 'dpl_sdk_rt';
-if (!OFFLINE) {
-  try { sessionStorage.removeItem(RT_KEY); } catch(e){}
-} else {
-  /* 只自动重载一次，避免极端情况下陷入刷新循环 */
-  var canRetry = true;
-  try { canRetry = sessionStorage.getItem(RT_KEY) !== '1'; sessionStorage.setItem(RT_KEY, '1'); } catch(e){}
-  if (canRetry) {
-    (function(){
-      var srcs = ['assets/sdk.js',
-        'https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js',
-        'https://unpkg.com/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js'];
-      var i = 0;
-      (function next(){
-        if (window.WorkBuddyCloud) { location.reload(); return; }
-        if (i >= srcs.length) return;
-        var s = document.createElement('script');
-        var u = srcs[i++];
-        s.src = u + (u.indexOf('?') < 0 ? '?r=' + Date.now() : '');
-        s.onerror = next;
-        s.onload = function(){ if (window.WorkBuddyCloud) location.reload(); else next(); };
-        document.head.appendChild(s);
-      })();
-    })();
-  }
+/* ============ 本地模式（本站点不使用云端服务） ============ */
+var LOCAL = true;
+var LS = {
+  get: function(k, d){ try{ var v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set: function(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del: function(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+/* ---- 账号（仅保存在本机浏览器） ---- */
+function usersAll(){ return LS.get('dpl_users', []); }
+function usersSave(list){ LS.set('dpl_users', list); }
+function hashPass(s){
+  var h1=5381, h2=52711, i=0;
+  for(i=0;i<s.length;i++){ h1=((h1<<5)+h1+s.charCodeAt(i))>>>0; h2=((h2<<5)+h2^s.charCodeAt(i))>>>0; }
+  return 'v1_' + h1.toString(36) + h2.toString(36);
 }
-/* 浏览模式客户端：模拟云 SDK 的接口形态，课程数据来自内置快照 */
-function offlineCloudClient(){
-  function q(data){
-    var c = {
-      select:function(){return c;}, eq:function(){return c;}, neq:function(){return c;},
-      in:function(){return c;}, gte:function(){return c;}, lte:function(){return c;},
-      gt:function(){return c;}, lt:function(){return c;}, like:function(){return c;},
-      order:function(){return c;}, limit:function(){return c;}, range:function(){return c;},
-      single:function(){return c;}, maybeSingle:function(){return c;}, textSearch:function(){return c;},
-      then:function(ok,bad){ return Promise.resolve({data:data, error:null}).then(ok,bad); }
-    };
-    return c;
-  }
-  function nope(msg){ return Promise.resolve({ data:null, error:new Error(msg) }); }
-  return {
-    database:{
-      from:function(t){ return q(t === 'courses' ? FALLBACK_COURSES : []); },
-      rpc:function(){ return nope('offline_mode'); }
-    },
-    auth:{
-      getSession:function(){ return Promise.resolve({ data:null, error:null }); },
-      sendOtp:function(){ return nope('offline_mode'); },
-      verifyOtp:function(){ return nope('offline_mode'); },
-      signOut:function(){ return Promise.resolve({ data:null, error:null }); },
-      onAuthStateChange:function(){ return function(){}; }
+function currentUser(){
+  var u = LS.get('dpl_session', null);
+  if(!u) return null;
+  var list = usersAll();
+  for(var i=0;i<list.length;i++){ if(list[i].username===u) return list[i]; }
+  return null;
+}
+function sessionUser(){
+  var u = currentUser();
+  return u ? { id:u.username, phone:u.phone, name:u.name, isLocal:true } : null;
+}
+/* ---- 本地场次（排期规则与景区公示一致） ---- */
+var LOCAL_SLOTS = {
+  'weave-40':      [['09:00-09:40',20],['10:30-11:10',20],['14:00-14:40',20],['15:30-16:10',20]],
+  'weave-98':      [['09:00-11:00',20],['11:00-13:00',20],['14:00-16:00',20]],
+  'weave-228':     [['09:00-12:00',20],['13:30-16:30',20]],
+  'study-1d':      [['08:30-12:30',40]],
+  'study-2d':      [['08:30-12:30',30]],
+  'study-camp':    [['08:30-17:00',30]],
+  'feast-fast':    [['11:30-13:00',60],['17:30-19:00',60]],
+  'feast-std':     [['11:30-13:00',80],['17:30-19:00',80]],
+  'feast-full':    [['11:30-13:30',40],['17:30-19:30',40]],
+  'stay-loft':     [['14:00 入住',8]],
+  'stay-yard':     [['14:00 入住',1]],
+  'stay-room':     [['14:00 入住',22]],
+  'show-osprey':   [['10:00-10:40',80],['15:00-15:40',80]],
+  'show-open':     [['开湖季全天场',200]],
+  'craft-lamp':    [['09:30-11:30',16],['14:00-16:00',16]],
+  'craft-basket':  [['09:30-11:00',16],['15:00-16:30',16]]
+};
+function localSeats(){
+  var box = LS.get('dpl_seats', null);
+  if(box) return box;
+  box = {};
+  var d, i, k;
+  for(d=1; d<=14; d++){
+    var iso = addDays(today(), d);
+    var dow = new Date(iso+'T00:00:00').getDay();
+    for(k in LOCAL_SLOTS){
+      if(k==='show-open' && dow!==6 && dow!==0) continue;   /* 开湖节只排周末 */
+      var list = LOCAL_SLOTS[k];
+      for(i=0;i<list.length;i++){
+        (box[k] = box[k] || []).push({ course_code:k, session_date:iso, slot:list[i][0],
+          capacity:list[i][1], booked:0 });
+      }
     }
-  };
+  }
+  LS.set('dpl_seats', box);
+  return box;
 }
-var cloud = OFFLINE
-  ? offlineCloudClient()
-  : WorkBuddyCloud.createWorkBuddyCloud({
-      endpoint: PUB.endpoint,
-      oauthRelayBaseUrl: PUB.oauthRelayBaseUrl,
-      publishableKey: PUB.publishableKey
-    });
+function seatOf(code, date, slot){
+  var arr = localSeats()[code] || [], i;
+  for(i=0;i<arr.length;i++){ if(arr[i].session_date===date && arr[i].slot===slot) return arr[i]; }
+  return null;
+}
+function saveSeats(box){ LS.set('dpl_seats', box); }
+/* ---- 本地订单 ---- */
+function ordersAll(){ return LS.get('dpl_orders', []); }
+function ordersSave(list){ LS.set('dpl_orders', list); }
+function newOrderNo(){
+  var d = new Date(), p = function(n){ return (n<10?'0':'')+n; };
+  var rnd = '';
+  for(var i=0;i<6;i++) rnd += Math.floor(Math.random()*10);
+  return 'DPH' + p(d.getFullYear()%100) + p(d.getMonth()+1) + p(d.getDate()) + rnd;
+}
 
 /* ============ 静态配置 ============ */
 var CATS = [
@@ -2531,6 +560,7 @@ var S = {
   session:null, orders:null,
   booking:{ code:'', date:'', slot:'', qty:1, name:'', phone:'', remark:'' },
   pendingOtp:null, resendAt:0,
+  loginMode:'login', login:{ user:'' },
   filter:'all', lastOrder:null,
   toast:'', toastBad:false, busy:false, afterLogin:null,
   car:0, carOrder:[], carLock:false,
@@ -2598,44 +628,28 @@ function friendly(err){
 }
 async function loadCourses(force){
   if(S.courses && !force) return S.courses;
-  try{
-    S.courses = unwrap(await cloud.database.from('courses').select('*').eq('active',true).order('sort_no',{ascending:true}), 'courses') || [];
-  }catch(e){
-    /* 镜像站点（非云端同源域名）无法访问云接口：改用内置快照展示 */
-    if(location.origin !== PUB.endpoint){ S.courses = FALLBACK_COURSES.slice(); }
-    else { throw e; }
-  }
+  S.courses = FALLBACK_COURSES.slice();
   return S.courses;
 }
 async function loadAllSeats(force){
   if(S.allSeatsLoaded && !force) return S.seatsByCourse;
   var codes=(S.courses||[]).map(function(c){ return c.code; });
   if(!codes.length) return S.seatsByCourse;
-  try{
-    var data = unwrap(await cloud.database.from('seats').select('*')
-        .in('course_code', codes).eq('active', true)
-        .gte('session_date', today()).lte('session_date', addDays(today(),14))
-        .order('session_date',{ascending:true}).order('slot',{ascending:true}), 'seats');
-    var box={};
-    (data||[]).forEach(function(s){ (box[s.course_code]=box[s.course_code]||[]).push(s); });
-    S.seatsByCourse = box;
-  }catch(e){ S.seatsByCourse = S.seatsByCourse || {}; }
-  S.allSeatsLoaded = true;
+  var box = localSeats();
+  S.seatsByCourse = box; S.allSeatsLoaded = true;
   return box;
 }
 async function refreshSession(){
-  try{ var r = await cloud.auth.getSession(); S.session = (r && r.data) || null; }
-  catch(e){ S.session = null; }
+  var u = sessionUser();
+  S.session = u ? { user: u } : null;
   return S.session;
 }
 async function loadOrders(force){
   if(S.orders && !force) return S.orders;
-  try{
-    S.orders = unwrap(await cloud.database.from('orders').select('*').order('created_at',{ascending:false}).limit(50), 'orders') || [];
-  }catch(e){
-    if(location.origin !== PUB.endpoint){ S.orders = []; }
-    else { throw e; }
-  }
+  var uid = (S.session && S.session.user && S.session.user.id) || null;
+  var all = ordersAll().filter(function(o){ return !uid || o.owner === uid; });
+  all.sort(function(a,b){ return a.created_at < b.created_at ? 1 : -1; });
+  S.orders = all;
   return S.orders;
 }
 
@@ -2658,7 +672,7 @@ document.addEventListener('click', function(e){
 /* ============ 视图 ============ */
 var TITLES = { home:'东平湖 · 渔旅体验课堂', courses:'选课报名', course:'课程详情', book:'填写预订信息',
   success:'预订成功', villages:'三个重点村', routes:'推荐线路', guide:'出行攻略', me:'我的',
-  orders:'我的订单', order:'订单详情', checkin:'核销台', login:'手机号登录', fav:'我的收藏' };
+  orders:'我的订单', order:'订单详情', checkin:'核销台', login:'账号登录', fav:'我的收藏' };
 function topbar(){
   var r=S.route;
   var sub = (r.name!=='home' && r.name!=='courses' && r.name!=='villages' && r.name!=='routes' && r.name!=='guide' && r.name!=='me');
@@ -3166,7 +1180,7 @@ function viewGuide(){
     + '<li><b>涉水安全</b>：织网体验在临湖广场固定区域进行；涉水体验配置救生设备与安全员，并为游客投保。</li>'
     + '<li><b>生态阈值</b>：限定活动范围与承载量，禁入保护核心区，不在保护区核心区开展经营活动。</li>'
     + '<li><b>经营合规</b>：依据《山东省休闲渔业管理办法》，涉水与休闲渔业项目均在核准的经营范围内开展，场所权属清晰。</li>'
-    + '<li><b>数据合规</b>：订单与账号数据保存在云端，仅本人可见；手机号只用于订单通知。</li>'
+    + '<li><b>数据合规</b>：账号与订单信息保存在本机浏览器中，仅本设备可见；手机号仅用于订单联系。</li>'
     + '</ul></div>'
     + '<div class="note"><span class="dot"></span>涉水项目请听从现场工作人员指引；如遇恶劣天气或水位变化，我们会提前通知改期安排，不产生额外费用。</div>'
     + '</div>';
@@ -3189,8 +1203,8 @@ function viewMe(){
     return '<div class="sec" style="margin-top:24px"><div class="card" style="text-align:center">'
       + '<div style="font-size:36px">👤</div>'
       + '<h4 style="margin-top:8px">登录后查看我的订单</h4>'
-      + '<p style="margin-top:6px">用手机号验证码登录，订单与预订信息会保存在你的账号下，换设备也能查到。</p>'
-      + '<div style="height:16px"></div><button class="btn wide" data-go="login">手机号登录 / 注册</button>'
+      + '<p style="margin-top:6px">注册账号后即可下单、查看与取消订单；账号与订单信息保存在本机浏览器中。</p>'
+      + '<div style="height:16px"></div><button class="btn wide" data-go="login">账号登录 / 注册</button>'
       + '</div>'
       + '<div class="sec"><div class="st"><i>🔐</i><h3>核销台</h3><small>工作人员入口</small></div>'
       + '<div class="card"><p>现场需要工作人员核销订单，请先登录后进入核销台。</p>'
@@ -3198,7 +1212,7 @@ function viewMe(){
       + '</div>';
   }
   var u=(S.session.user||{});
-  var id=u.phone||u.email||u.id||'已登录用户';
+  var id=u.id||u.phone||'已登录用户';
   return '<div class="sec" style="margin-top:20px">'
     + '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
       + '<div class="logo" style="width:46px;height:46px;flex:0 0 46px;font-size:22px">👤</div>'
@@ -3223,19 +1237,33 @@ function viewFav(){
 
 /* ---- 登录 ---- */
 function viewLogin(){
+  var isReg = (S.loginMode||'login') === 'reg';
   return '<div class="sec" style="margin-top:20px"><div class="card">'
-    + '<h4>手机号登录 / 注册</h4>'
-    + '<p style="margin-top:6px">首次使用会自动创建账号。登录后即可下单、查看与取消订单。</p>'
-    + '<div style="height:16px"></div>'
-    + '<div class="fld" id="f-phone"><label>手机号</label>'
-    + '<input id="i-phone" inputmode="numeric" maxlength="11" placeholder="请输入 11 位手机号" value="'+esc(S.booking.phone)+'" autocomplete="tel">'
-    + '<div class="err">请输入正确的 11 位手机号</div></div>'
-    + '<div class="fld" id="f-code"><label>短信验证码</label><div class="otprow">'
-    + '<input id="i-otp" inputmode="numeric" maxlength="6" placeholder="6 位验证码">'
-    + '<button type="button" data-act="send" '+(S.busy?'disabled':'')+'>'+(S.resendAt>Date.now()? Math.ceil((S.resendAt-Date.now())/1000)+'s 后重发' : '获取验证码')+'</button>'
-    + '</div><div class="err">请输入验证码</div></div>'
-    + '<button class="btn wide" data-act="login">'+(S.busy?'处理中…':'登录 / 注册')+'</button>'
-    + '<div class="hint">登录即表示同意将手机号用于订单通知；您的手机号仅用于订单与行前提醒，不会向第三方提供。'+(S.afterLogin?'<br><b style="color:var(--pine2)">登录成功后将自动返回你刚才的操作。</b>':'')+'</div>'
+    + '<div class="segtab">'
+    + '<button class="'+(isReg?'':'on')+'" data-act="lmode" data-v="login">登录</button>'
+    + '<button class="'+(isReg?'on':'')+'" data-act="lmode" data-v="reg">注册新账号</button>'
+    + '</div><div style="height:16px"></div>'
+    + '<div class="fld" id="f-user"><label>账号</label>'
+    + '<input id="i-user" maxlength="20" placeholder="4—20 位字母或数字" value="'+esc(S.login.user)+'" autocomplete="username">'
+    + '<div class="err">账号需为 4—20 位字母或数字</div></div>'
+    + '<div class="fld" id="f-pass"><label>密码</label>'
+    + '<input id="i-pass" type="password" maxlength="20" placeholder="至少 6 位" autocomplete="'+(isReg?'new-password':'current-password')+'">'
+    + '<div class="err">密码至少 6 位</div></div>'
+    + (isReg
+        ? '<div class="fld" id="f-name"><label>姓名</label>'
+          + '<input id="i-name" maxlength="20" placeholder="用于现场点名" value="'+esc(S.booking.name)+'" autocomplete="name">'
+          + '<div class="err">请填写姓名</div></div>'
+          + '<div class="fld" id="f-phone"><label>手机号</label>'
+          + '<input id="i-phone" inputmode="numeric" maxlength="11" placeholder="11 位手机号" value="'+esc(S.booking.phone)+'" autocomplete="tel">'
+          + '<div class="err">请输入正确的 11 位手机号</div></div>'
+          + '<div class="fld" id="f-pass2"><label>确认密码</label>'
+          + '<input id="i-pass2" type="password" maxlength="20" placeholder="再输一次密码">'
+          + '<div class="err">两次输入的密码不一致</div></div>'
+        : '')
+    + '<button class="btn wide" data-act="login">'+(S.busy?'处理中…':(isReg?'注册并登录':'登录'))+'</button>'
+    + '<div class="hint">'+(isReg
+        ? '注册后账号与订单信息保存在本机浏览器中，可立即下单、查看与取消订单。'
+        : '账号与订单信息保存在本机浏览器中。')+(S.afterLogin?'<br><b style="color:var(--pine2)">登录成功后将自动返回你刚才的操作。</b>':'')+'</div>'
     + '</div></div>';
 }
 
@@ -3330,7 +1358,7 @@ function foot(){
   return '<div class="foot"><div class="wrap">'
     + '<b>东平湖 · 渔旅体验课堂</b> · 东平湖景区<br>'
     + '课程与项目由景区统一排期与结算，价格公开，名额实时可查；费用到店 / 开课前现场支付。<br>'
-    + '订单与账号数据保存在云端，仅本人可见。图片素材：<a href="https://www.pexels.com/" target="_blank" rel="noopener">Pexels</a>（免费可商用）；背景音乐：Sunshine Day · Mixaund（CC BY 4.0，free-stock-music.com）。<br>'
+    + '账号与订单信息保存在本机浏览器中，仅本设备可见。图片素材：<a href="https://www.pexels.com/" target="_blank" rel="noopener">Pexels</a>（免费可商用）；背景音乐：Sunshine Day · Mixaund（CC BY 4.0，free-stock-music.com）。<br>'
     + '键盘 ← → 可翻页 · <a href="#" id="topLink">回到顶部</a>'
     + '</div></div>';
 }
@@ -3352,10 +1380,7 @@ function paint(){
   else if(r.name==='checkin') body=viewCheckin();
   else body=viewHome();
 
-  var MIRROR = (location.origin !== PUB.endpoint);
   var banner = '';
-  if (OFFLINE) banner += '<div class="wrap" style="margin-top:14px"><div class="note" style="border-color:var(--gold)"><span class="dot" style="background:var(--gold)"></span>当前为<b>浏览模式</b>：云服务暂未连接，项目信息可正常浏览，但暂不能提交订单或登录。请稍后刷新页面重试。</div></div>';
-  if (MIRROR && !OFFLINE) banner += '<div class="wrap" style="margin-top:14px"><div class="note" style="border-color:var(--gold)"><span class="dot" style="background:var(--gold)"></span>当前为<b>展示镜像</b>：项目信息可正常浏览；<b>在线报名与订单查询</b>请前往 <a href="'+PUB.endpoint+'/" target="_blank" rel="noopener">正式下单地址</a>。</div></div>';
   document.body.classList.toggle('hasbar', !!bar);
   document.getElementById('app').innerHTML =
     topbar() + banner + '<main class="wrap">'+body+'</main>' + foot() + bar + tabbar()
@@ -3391,7 +1416,7 @@ document.addEventListener('click', function(e){
     S.booking.qty++; paint(); return;
   }
   if(act==='submit'){ submitBooking(); return; }
-  if(act==='send'){ sendCode(); return; }
+  if(act==='lmode'){ S.loginMode=t.getAttribute('data-v'); paint(); return; }
   if(act==='login'){ doLogin(); return; }
   if(act==='logout'){ doLogout(); return; }
   if(act==='cancel'){ doCancel(t.getAttribute('data-id')); return; }
@@ -3547,17 +1572,28 @@ async function submitBooking(){
   }
   S.busy=true; paint();
   try{
-    var res=await cloud.database.rpc('book_course',{
-      p_course_code:c.code, p_date:b.date, p_slot:b.slot, p_qty:b.qty,
-      p_name:b.name.trim(), p_phone:b.phone, p_remark:(b.remark||'').trim()||null
-    });
-    if(res && res.error) throw new Error(res.error.message||'下单失败');
-    var o=res.data; if(typeof o==='string'){ try{ o=JSON.parse(o); }catch(e){} }
-    S.lastOrder=o;
-    S.allSeatsLoaded=false; S.seatsByCourse={}; S.orders=null; S.busy=false;
-    toast('预订成功，名额已锁定');
+    var seat = seatOf(c.code, b.date, b.slot);
+    if(!seat) throw new Error('session_not_found');
+    if(seat.booked + b.qty > seat.capacity) throw new Error('seat_not_enough');
+    var total = c.price_cents * b.qty;
+    var order = {
+      id: Date.now(), order_no: newOrderNo(),
+      owner: S.session.user.id,
+      course_code: c.code, course_title: c.title, cat: c.cat,
+      session_date: b.date, session_slot: b.slot, duration: c.duration,
+      qty: b.qty, unit_price_cents: c.price_cents, total_cents: total,
+      buyer_name: b.name.trim(), buyer_phone: b.phone,
+      remark: (b.remark||'').trim() || null,
+      status: 'pending', pay_method: 'onsite',
+      checked_at: null, created_at: new Date().toISOString()
+    };
+    var all = ordersAll(); all.push(order); ordersSave(all);
+    seat.booked += b.qty; saveSeats(localSeats());
+    S.lastOrder = order;
+    S.seatsByCourse[c.code] = null; delete S.seatsByCourse[c.code];
+    S.orders = null; S.busy=false;
+    toast('报名成功，名额已锁定');
     go('success');
-    if(S.session) loadOrders(true).catch(function(){});
   }catch(err){
     S.busy=false; paint(); toast(friendly(err), true);
   }
@@ -3565,52 +1601,52 @@ async function submitBooking(){
 
 /* ---- 登录 ---- */
 function setFldErr(id,show){ var f=document.getElementById(id); if(f) f.classList.toggle('bad', !!show); }
-async function sendCode(){
-  if(S.busy) return;
-  var el=document.getElementById('i-phone'); var phone=(el&&el.value||'').replace(/\D/g,'');
-  if(!/^1\d{10}$/.test(phone)){ setFldErr('f-phone',true); return; }
-  setFldErr('f-phone',false);
-  S.busy=true; paint();
-  try{
-    var sent=await cloud.auth.sendOtp({ phone:phone });
-    if(sent.error) throw new Error(sent.error.message||'验证码发送失败');
-    S.pendingOtp={ phone:phone, verificationId:sent.data.verificationId, isExistingUser:sent.data.isExistingUser };
-    S.resendAt=Date.now()+60000;
-    S.busy=false; paint();
-    toast('验证码已发送，请查看短信');
-    var iv=setInterval(function(){
-      if(Date.now()>=S.resendAt){ clearInterval(iv); if(S.route.name==='login') paint(); }
-      else if(S.route.name==='login'){
-        var btn=document.querySelector('[data-act="send"]');
-        if(btn){ btn.textContent=Math.ceil((S.resendAt-Date.now())/1000)+'s 后重发'; btn.disabled=true; }
-      } else clearInterval(iv);
-    },1000);
-  }catch(err){ S.busy=false; paint(); toast(friendly(err), true); }
-}
 async function doLogin(){
   if(S.busy) return;
-  var pel=document.getElementById('i-phone'), cel=document.getElementById('i-otp');
-  var phone=(pel&&pel.value||'').replace(/\D/g,''), code=(cel&&cel.value||'').replace(/\D/g,'');
-  if(!/^1\d{10}$/.test(phone)){ setFldErr('f-phone',true); return; }
-  if(!code){ setFldErr('f-code',true); return; }
-  var p=S.pendingOtp;
-  if(!p || p.phone!==phone){ setFldErr('f-code',true); toast('请先为当前手机号获取验证码', true); return; }
-  setFldErr('f-phone',false); setFldErr('f-code',false);
-  S.busy=true; paint();
-  try{
-    var done=await cloud.auth.verifyOtp({ phone:p.phone, verificationId:p.verificationId, isExistingUser:p.isExistingUser, token:code });
-    if(done.error) throw new Error(done.error.message||'验证码校验失败');
-    S.pendingOtp=null; S.busy=false;
-    await refreshSession();
-    S.orders=null;
-    toast('登录成功');
+  var isReg = (S.loginMode||'login') === 'reg';
+  var uEl=document.getElementById('i-user'), pEl=document.getElementById('i-pass');
+  var user=(uEl&&uEl.value||'').trim(), pass=(pEl&&pEl.value||'');
+  var bad=false;
+  if(!/^[A-Za-z0-9]{4,20}$/.test(user)){ setFldErr('f-user',true); bad=true; } else setFldErr('f-user',false);
+  if(pass.length<6){ setFldErr('f-pass',true); bad=true; } else setFldErr('f-pass',false);
+  if(isReg){
+    var nEl=document.getElementById('i-name'), phEl=document.getElementById('i-phone'), p2El=document.getElementById('i-pass2');
+    var name=(nEl&&nEl.value||'').trim(), phone=(phEl&&phEl.value||'').replace(/\D/g,''), p2=(p2El&&p2El.value||'');
+    if(!name){ setFldErr('f-name',true); bad=true; } else setFldErr('f-name',false);
+    if(!/^1\d{10}$/.test(phone)){ setFldErr('f-phone',true); bad=true; } else setFldErr('f-phone',false);
+    if(!p2 || p2!==pass){ setFldErr('f-pass2',true); bad=true; } else setFldErr('f-pass2',false);
+    if(bad){ toast('请检查填写内容', true); return; }
+    var list=usersAll();
+    for(var i=0;i<list.length;i++){
+      if(list[i].username===user){ setFldErr('f-user',true); toast('该账号已存在，请直接登录', true); return; }
+    }
+    S.busy=true; paint();
+    var rec={ username:user, pass:hashPass(pass), name:name, phone:phone, createdAt:new Date().toISOString() };
+    list.push(rec); usersSave(list);
+    LS.set('dpl_session', user);
+    S.login.user = user;
+    S.booking.name=name; S.booking.phone=phone;
+    S.busy=false; await refreshSession(); S.orders=null;
+    toast('注册成功，已登录');
     var back=S.afterLogin; S.afterLogin=null;
-    if(back){ go(back); } else { go('me'); }
-    if(S.session) loadOrders(true).catch(function(){});
-  }catch(err){ S.busy=false; paint(); toast(friendly(err), true); }
+    go(back || 'me');
+    return;
+  }
+  if(bad){ toast('请检查账号与密码', true); return; }
+  S.busy=true; paint();
+  var list2=usersAll(), rec2=null;
+  for(var j=0;j<list2.length;j++){ if(list2[j].username===user){ rec2=list2[j]; break; } }
+  if(!rec2 || rec2.pass!==hashPass(pass)){ S.busy=false; paint(); toast('账号或密码不正确', true); return; }
+  LS.set('dpl_session', user);
+  S.login.user = user;
+  S.booking.name=rec2.name; S.booking.phone=rec2.phone;
+  S.busy=false; await refreshSession(); S.orders=null;
+  toast('登录成功');
+  var back2=S.afterLogin; S.afterLogin=null;
+  go(back2 || 'me');
 }
 async function doLogout(){
-  try{ await cloud.auth.signOut(); }catch(e){}
+  LS.del('dpl_session');
   S.session=null; S.orders=null;
   toast('已退出登录'); go('me');
 }
@@ -3622,15 +1658,25 @@ async function doCancel(id){
   if(!window.confirm('确认取消订单 '+o.order_no+' 吗？取消后名额立即释放，且不可恢复。')) return;
   S.busy=true;
   try{
-    var res=await cloud.database.rpc('cancel_order',{ p_order_id:Number(id) });
-    if(res && res.error) throw new Error(res.error.message||'取消失败');
-    S.orders=null; S.allSeatsLoaded=false; S.seatsByCourse={};
+    var all = ordersAll();
+    for(var i=0;i<all.length;i++){
+      if(String(all[i].id)===String(id)){
+        if(all[i].owner !== (S.session&&S.session.user&&S.session.user.id)) throw new Error('not_owner');
+        if(all[i].status!=='pending' && all[i].status!=='confirmed') throw new Error('not_cancelable');
+        all[i].status='canceled'; all[i].updated_at=new Date().toISOString();
+      }
+    }
+    ordersSave(all);
+    var seat = seatOf(o.course_code, o.session_date, o.session_slot);
+    if(seat){ seat.booked = Math.max(0, seat.booked - o.qty); saveSeats(localSeats()); }
+    S.orders=null; S.seatsByCourse[o.course_code]=null; delete S.seatsByCourse[o.course_code];
     await loadOrders(true);
     S.busy=false; toast('订单已取消，名额已释放'); go('orders');
   }catch(err){ S.busy=false; paint(); toast(friendly(err), true); }
 }
 
 /* ---- 核销 ---- */
+var STAFF_CODE = 'sangyuan2026';
 async function doCheckin(){
   if(S.busy) return;
   var nel=document.getElementById('i-no'), sel=document.getElementById('i-staff');
@@ -3640,19 +1686,23 @@ async function doCheckin(){
   setFldErr('f-no',false); setFldErr('f-staff',false);
   S.busy=true; paint();
   try{
-    var res=await cloud.database.rpc('checkin_order',{ p_order_no:no, p_staff_code:staff });
-    if(res && res.error) throw new Error(res.error.message||'核销失败');
-    var d=res.data; if(typeof d==='string'){ try{ d=JSON.parse(d); }catch(e){} }
+    if(staff !== STAFF_CODE) throw new Error('invalid_staff_code');
+    var all = ordersAll(), o = null;
+    for(var i=0;i<all.length;i++){ if(all[i].order_no===no){ o=all[i]; break; } }
+    if(!o) throw new Error('order_not_found');
+    if(o.status==='canceled') throw new Error('order_canceled');
+    var reused = (o.status==='used');
+    if(!reused){ o.status='used'; o.checked_at=new Date().toISOString(); ordersSave(all); }
     S.busy=false; paint();
     var box=document.getElementById('ck-result');
     if(box){
       box.innerHTML='<div class="card" style="margin-top:14px;border-color:var(--moss)">'
-        + '<h4>'+(d.reused?'⚠️ 该订单已核销过':'✅ 核销成功')+'</h4>'
-        + '<dl class="kv"><dt>订单号</dt><dd>'+esc(d.order_no)+'</dd>'
-        + (d.course_title?'<dt>项目</dt><dd>'+esc(d.course_title)+'</dd>':'')
-        + (d.qty?'<dt>数量</dt><dd>'+d.qty+'</dd>':'')
-        + (d.session_date?'<dt>场次</dt><dd>'+esc(d.session_date)+' '+esc(d.session_slot||'')+'</dd>':'')
-        + (d.checked_at?'<dt>核销时间</dt><dd>'+esc(String(d.checked_at).slice(0,16).replace('T',' '))+'</dd>':'')
+        + '<h4>'+(reused?'⚠️ 该订单已核销过':'✅ 核销成功')+'</h4>'
+        + '<dl class="kv"><dt>订单号</dt><dd>'+esc(o.order_no)+'</dd>'
+        + '<dt>项目</dt><dd>'+esc(o.course_title)+'</dd>'
+        + '<dt>数量</dt><dd>'+o.qty+'</dd>'
+        + '<dt>场次</dt><dd>'+esc(o.session_date)+' '+esc(o.session_slot)+'</dd>'
+        + '<dt>核销时间</dt><dd>'+esc(String(o.checked_at).slice(0,16).replace('T',' '))+'</dd>'
         + '</dl></div>';
     }
   }catch(err){
@@ -3703,13 +1753,6 @@ async function boot(){
 S.fav = favLoad();
 
 refreshSession().then(function(){ boot(); });
-try{
-  cloud.auth.onAuthStateChange(function(evt,sess){
-    S.session=sess||null;
-    if(evt==='SIGNED_OUT'){ S.orders=null; }
-    paint();
-  });
-}catch(e){}
 
 })();
 </script>
