@@ -417,7 +417,7 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
   var WL = META.water_level;
 
   var scene, camera, renderer, clock;
-  var terrainMesh, waterMesh, waterMat;
+  var terrainMesh, waterMesh, waterMat, shelfMesh, shelfMat;
   var bldWall, bldRoof, bldRoofSlope, bldWalls = null;       // InstancedMesh
   var treeMeshA, treeMeshB;
   var localTiles = [];
@@ -551,25 +551,33 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
       geo.rotateX(-Math.PI / 2);
       // 逐顶点贴地：陆地贴地形上方，水面区域沉到水下 0.6m（被水体盖住）
       var ppos = geo.attributes.position;
+      var wflags = new Float32Array(ppos.count);   // 1=水域顶点（片元丢弃）
       for (var vi = 0; vi < ppos.count; vi++) {
         var vx = cx + ppos.getX(vi), vz = cz + ppos.getZ(vi);
-        if (inWater(vx, vz)) { ppos.setY(vi, WL - 0.6); continue; }
+        if (inWater(vx, vz)) { ppos.setY(vi, WL - 0.6); wflags[vi] = 1; continue; }
         var th = terrainH(vx, vz);
         if (th > WL + 0.15) ppos.setY(vi, th + lift);
-        else ppos.setY(vi, WL - 0.6);
+        else { ppos.setY(vi, WL - 0.6); wflags[vi] = 1; }
       }
+      geo.setAttribute('aW', new THREE.BufferAttribute(wflags, 1));
       ppos.needsUpdate = true;
       geo.computeVertexNormals();
       var mesh = new THREE.Mesh(geo, (function () {
         var mat = new THREE.MeshLambertMaterial({ map: tex, transparent: true,
           polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 });
         mat.onBeforeCompile = function (shader) {
-          shader.fragmentShader = shader.fragmentShader.replace(
-            'vec4 diffuseColor = vec4( diffuse, opacity );',
-            'vec4 diffuseColor = vec4( diffuse, opacity );\n' +
-            'float edge = min(min(vUv.x, 1.0-vUv.x), min(vUv.y, 1.0-vUv.y));\n' +
-            'diffuseColor.a *= smoothstep(0.004, 0.045, edge);'
-          );
+          shader.vertexShader = shader.vertexShader
+            .replace('#include <common>', '#include <common>\nattribute float aW;\nvarying float vWf;')
+            .replace('#include <begin_vertex>', '#include <begin_vertex>\nvWf = aW;');
+          shader.fragmentShader = shader.fragmentShader
+            .replace('#include <common>', '#include <common>\nvarying float vWf;')
+            .replace(
+              'vec4 diffuseColor = vec4( diffuse, opacity );',
+              'vec4 diffuseColor = vec4( diffuse, opacity );\n' +
+              'float edge = min(min(vUv.x, 1.0-vUv.x), min(vUv.y, 1.0-vUv.y));\n' +
+              'diffuseColor.a *= smoothstep(0.004, 0.045, edge);')
+            .replace('#include <dithering_fragment>',
+              'if (vWf > 0.5) discard;\n#include <dithering_fragment>');
         };
         return mat;
       })());
@@ -625,13 +633,13 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
     depthTex.magFilter = THREE.LinearFilter;
     depthTex.needsUpdate = true;
     waterMat = new THREE.ShaderMaterial({
-      transparent: true,
+      transparent: false,   // 不透明：彻底消除贴图/地形透过水面造成的色差斑块
       uniforms: {
         uTime: { value: 0 },
         uSun: { value: SUN_DIR.clone() },
-        uDeep: { value: new THREE.Color(0x14414f) },
+        uDeep: { value: new THREE.Color(0x113a48) },
         uMid: { value: new THREE.Color(0x1c5560) },
-        uShallow: { value: new THREE.Color(0x4c8f80) },
+        uShallow: { value: new THREE.Color(0x5a9a86) },
         uFoam: { value: new THREE.Color(0xb9d8cc) },
         uSky: { value: new THREE.Color(0xbfd8e8) },
         uNight: { value: 0 },
@@ -657,7 +665,7 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
         '  // 地形高度 → 水深（离岸近水浅）',
         '  vec2 duv = vW.xz / uSize + 0.5;',
         '  float ground = 30.0 + texture2D(uDepthTex, duv).r * 20.0;',
-        '  float depth = clamp((38.5 - ground) / 4.5, 0.0, 1.0);',
+        '  float depth = clamp((38.5 - ground) / 7.5, 0.0, 1.0);',
         // 波纹法线（多层）
         '  vec2 p = vW.xz * 0.006;',
         '  float w1 = sin(p.x*1.0 + uTime*0.7) * cos(p.y*1.15 - uTime*0.55);',
@@ -667,8 +675,10 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
         '  float amp = 0.05 * (0.25 + 0.75*dfade);',
         '  vec3 N = normalize(vec3((w1*0.42 + w2*0.28 + w3*0.16 + w4*0.08)*amp, 1.0, (w2*0.4 - w3*0.22 + w4*0.06)*amp));',
         // 水体颜色：浅滩 → 中部 → 深水
-        '  vec3 col = mix(uShallow, uMid, clamp(depth*1.6, 0.0, 1.0));',
-        '  col = mix(col, uDeep, clamp(depth*1.5 - 0.2, 0.0, 1.0));',
+        '  vec3 col = mix(uShallow, uMid, smoothstep(0.0, 0.75, depth));',
+        '  col = mix(col, uDeep, smoothstep(0.35, 1.0, depth));',
+        '  float vast = sin(vW.x * 0.00035 + sin(vW.z * 0.00028) * 1.4) * 0.5 + 0.5;',
+        '  col *= 0.955 + 0.09 * vast;',   // 大面积极缓明度起伏
         // 天空反射（菲涅尔）
         '  float fres = pow(1.0 - max(dot(V, N), 0.0), 2.0);',
         '  col = mix(col, uSky, clamp(fres*0.72, 0.0, 0.72));',
@@ -682,7 +692,7 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
         '  float foam = smoothstep(0.32, 0.05, depth) * (0.35 + 0.65*sin((p.x+p.y)*3.2 + uTime*1.6)*0.5+0.5);',
         '  col = mix(col, uFoam, clamp(foam*0.35, 0.0, 0.4));',
         '  col *= (1.0 - uNight*0.68);',
-        '  gl_FragColor = vec4(col, 0.9);',
+        '  gl_FragColor = vec4(col, 1.0);',
         '}'
       ].join('\n')
     });
@@ -690,6 +700,65 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
     waterMesh.position.y = WL + 0.28;
     waterMesh.renderOrder = 2;
     scene.add(waterMesh);
+
+    // ---------- 浅滩裙带：主湖岸线外扩，透明度渐隐，统一水陆过渡带 ----------
+    var main = null;
+    for (var mi = 0; mi < polys.length; mi++) {
+      if (polys[mi].area_km2 > 50) { main = polys[mi]; break; }
+    }
+    if (main) {
+      var ring = main.ring, rn = ring.length;
+      var rcx = 0, rcz = 0;
+      for (var ri = 0; ri < rn; ri++) { rcx += ring[ri][0]; rcz += ring[ri][1]; }
+      rcx /= rn; rcz /= rn;
+      // 外扩 380m（质心方向）+ 两轮拉普拉斯平滑（减少自交折叠）
+      var outer = [];
+      for (var rj = 0; rj < rn; rj++) {
+        var ddx = ring[rj][0] - rcx, ddz = ring[rj][1] - rcz;
+        var dln = Math.hypot(ddx, ddz) || 1;
+        outer.push([ring[rj][0] + ddx / dln * 520, ring[rj][1] + ddz / dln * 520]);
+      }
+      for (var pass = 0; pass < 2; pass++) {
+        var sm2 = outer.slice();
+        for (var rk = 0; rk < rn; rk++) {
+          var pa = sm2[(rk - 1 + rn) % rn], pb = sm2[(rk + 1) % rn];
+          outer[rk] = [sm2[rk][0] * 0.5 + (pa[0] + pb[0]) * 0.25,
+                       sm2[rk][1] * 0.5 + (pa[1] + pb[1]) * 0.25];
+        }
+      }
+      var sv = [], sa = [], si = [];
+      for (var rq = 0; rq < rn; rq++) {
+        sv.push(ring[rq][0], 0, ring[rq][1]); sa.push(0.78);
+        sv.push(outer[rq][0], 0, outer[rq][1]); sa.push(0.0);
+      }
+      for (var rt = 0; rt < rn; rt++) {
+        var ia = rt * 2, ib = rt * 2 + 1;
+        var ic = ((rt + 1) % rn) * 2, id = ((rt + 1) % rn) * 2 + 1;
+        si.push(ia, ic, ib, ib, ic, id);
+      }
+      var sg = new THREE.BufferGeometry();
+      sg.setAttribute('position', new THREE.Float32BufferAttribute(sv, 3));
+      sg.setAttribute('aA', new THREE.Float32BufferAttribute(sa, 1));
+      sg.setIndex(si);
+      sg.computeVertexNormals();
+      shelfMat = new THREE.ShaderMaterial({
+        transparent: true, depthWrite: false, side: THREE.DoubleSide,
+        uniforms: { uColor: { value: new THREE.Color(0x3f8378) }, uNight: { value: 0 } },
+        vertexShader: [
+          'attribute float aA; varying float vA;',
+          'void main(){ vA = aA; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }'
+        ].join('\n'),
+        fragmentShader: [
+          'uniform vec3 uColor; uniform float uNight; varying float vA;',
+          'void main(){ gl_FragColor = vec4(uColor * (1.0 - uNight * 0.55), vA); }'
+        ].join('\n')
+      });
+      shelfMesh = new THREE.Mesh(sg, shelfMat);
+      shelfMesh.position.y = WL + 0.26;
+      shelfMesh.renderOrder = 1;
+      scene.add(shelfMesh);
+      console.log('[shelf] 裙带', rn, '段');
+    }
   }
 
   // ---------- 湖岸护堤（沿主湖岸线的浅色护带） ----------
@@ -1456,6 +1525,7 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
     scene.fog.color.copy(skyMat.uniforms.uHor.value);
     // 水面
     if (nightMat) nightMat.opacity = n * 0.92;
+    if (shelfMat) shelfMat.uniforms.uNight.value = n;
     if (waterMat) {
       waterMat.uniforms.uNight.value = n;
       waterMat.uniforms.uSun.value.copy(SUN_DIR);
@@ -2161,17 +2231,18 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
     }
     document.getElementById('amapMode').addEventListener('click', function () {
       if (!amap) return;
-      if (amapSatOn) {
-        amap.remove(satLayer);
-        amap.setMapStyle('amap://styles/normal');
-        this.textContent = '卫星图';
-        amapSatOn = false;
-      } else {
-        satLayer = new AMap.TileLayer.Satellite();
-        amap.add(satLayer);
-        this.textContent = '矢量图';
-        amapSatOn = true;
-      }
+      try {
+        if (amapSatOn) {
+          if (satLayer) amap.remove(satLayer);
+          this.textContent = '卫星图';
+          amapSatOn = false;
+        } else {
+          satLayer = new AMap.TileLayer.Satellite();
+          amap.add(satLayer);
+          this.textContent = '矢量图';
+          amapSatOn = true;
+        }
+      } catch (e) { console.warn('[amap] 切换失败', e); }
     });
     document.getElementById('amapBig').addEventListener('click', toggleBigMap);
     document.getElementById('amapBig2').addEventListener('click', toggleBigMap);
@@ -2184,15 +2255,22 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
   function buildAmap() {
     if (amapReady) return;
     amapReady = true;
+    // 关键：不能用构造函数 layers（会整体替换默认底图图层 → 白图）；
+    // 必须先建默认底图，再 add 卫星栅格层叠加。
     amap = new AMap.Map('amap', {
       zoom: 11,
       center: [116.25, 35.96],
       mapStyle: 'amap://styles/normal',
-      viewMode: '2D',
-      layers: [new AMap.TileLayer.Satellite()]
+      viewMode: '2D'
     });
+    try {
+      satLayer = new AMap.TileLayer.Satellite();
+      amap.add(satLayer);
+    } catch (e) {
+      satLayer = null;
+      console.warn('[amap] 卫星层加载失败，保留矢量底图', e);
+    }
     amap.on('complete', function () { document.getElementById('amapTitle').textContent = '高德卫星影像 · 联动定位'; });
-    satLayer = amap.getLayers().filter(function (l) { return l instanceof AMap.TileLayer.Satellite; })[0] || null;
     buildAmapMarkers();
   }
 
