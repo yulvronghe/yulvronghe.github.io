@@ -120,7 +120,11 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #side.min{transform:translateX(calc(100% + 20px));opacity:0}
 #amapWrap{position:relative;flex:none;height:224px;border-radius:13px;overflow:hidden;
   border:1px solid var(--line);box-shadow:var(--shadow);background:#dfe8dc}
-#amap{position:absolute;inset:0}
+#mmap{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab;display:block}
+#mmap:active{cursor:grabbing}
+#amapWrap.big{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;
+  width:min(680px,calc(100vw - 40px));height:auto;box-shadow:0 18px 60px rgba(8,20,14,.45);
+  border:1px solid rgba(181,132,58,.5)}
 #amapFallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
   background:#e7ece0;color:var(--ink2);font-size:11.5px;text-align:center;padding:16px;line-height:1.8}
 #amapFallback .hidden{display:none}
@@ -223,10 +227,9 @@ html.m #rail .rb{width:52px;padding:5px 0 4px;font-size:9.5px}
 html.m #rail .rb .ic{font-size:14px}
 html.m #rail .sp{width:1px;height:auto;margin:2px 2px}
 html.m .fly{top:64px;left:8px;right:8px;width:auto;max-height:48vh}
-html.m #side{top:auto;right:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:34vh;flex-direction:column-reverse}
+html.m #side{top:auto;right:auto;left:8px;right:8px;bottom:58px;width:auto;max-height:36vh;flex-direction:column-reverse}
 html.m #side.min{transform:translateY(calc(100% + 20px))}
-html.m #amapWrap{height:150px;display:none}
-html.m #amapWrap.on{display:block}
+html.m #amapWrap{height:148px;display:block}
 html.m #card{max-height:34vh}
 html.m #timebar{left:8px;right:auto;bottom:8px;flex-wrap:nowrap;max-width:calc(100vw - 16px);padding:6px 9px}
 html.m #timeSlider{width:74px}
@@ -249,6 +252,7 @@ html.m .wh-r{display:none}
       <button class="rb" data-p="pLayer" title="图层"><span class="ic">🧱</span><span>图层</span></button>
       <button class="rb" data-p="pMark" title="标注与模拟"><span class="ic">🏷</span><span>标注</span></button>
       <button class="rb" data-p="pData" title="数据与说明"><span class="ic">📊</span><span>数据</span></button>
+      <button class="rb" data-p="pQr" title="手机扫码访问"><span class="ic">📱</span><span>扫码</span></button>
       <div class="sp"></div>
       <button class="rb" id="bMode" title="切换手机端 / 电脑端预览"><span class="ic">📱</span><span id="bModeTxt">手机端</span></button>
     </nav>
@@ -341,6 +345,21 @@ html.m .wh-r{display:none}
       </div>
     </div>
 
+    <!-- 扫码 -->
+    <div class="fly" id="pQr">
+      <div class="hd"><b>手机扫码访问</b><button class="x" data-close="pQr">✕</button></div>
+      <div style="text-align:center;padding:4px 0 2px">
+        <img id="qrImg" src="data:image/png;base64,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" alt="访问二维码"
+             style="width:148px;height:148px;border-radius:10px;border:1px solid var(--line);background:#fff;padding:6px">
+        <div style="font-size:11px;color:var(--ink2);margin-top:9px">用微信 / 相机 / 浏览器扫码打开</div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:3px;word-break:break-all;padding:0 8px">https://yulvronghe.github.io/3d/</div>
+      </div>
+      <div class="hr"></div>
+      <div class="sec">手机版布局</div>
+      <button class="pbtn" id="bMode2">切换到手机版布局</button>
+      <div class="mini" style="font-size:10px;color:var(--ink3);line-height:1.5;margin-top:6px">手机版自动适配触屏与竖屏：单指旋转、双指缩放、面板收拢为底部卡片。当前窗口也可手动切换预览效果。</div>
+    </div>
+
     <!-- 左下：昼夜 -->
     <div class="panel" id="timebar">
       <button id="timePlay" title="播放一天">▶</button>
@@ -357,8 +376,7 @@ html.m .wh-r{display:none}
     <!-- 右侧：高德地图 + 信息卡 -->
     <aside id="side">
       <div id="amapWrap">
-        <div id="amap"></div>
-        <div id="amapFallback" style="display:none"><div>高德地图未加载<br><span style="font-size:10.5px;color:var(--ink3)">需要联网才能显示在线地图；三维模型部分不受影响。</span></div></div>
+        <canvas id="mmap"></canvas>
         <div class="amapBar">
           <span id="amapTitle">高德卫星影像 · 联动定位</span>
           <button class="sm" id="amapMode">矢量图</button>
@@ -1671,7 +1689,7 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
     initMarks();
     initCards();
     initDayNight();
-    initAmap();
+    initMiniMap();
     initMobile();
     initNote();
     initDataPanel();
@@ -2027,44 +2045,86 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
   function updateLabels() {
     var w = window.innerWidth, h = window.innerHeight;
     var dist = cam.dist;
-    // 业态徽章
+    var cands = [];
+
+    // ---------- 收集候选标签 ----------
+    // 业态徽章（优先级 1）
     Object.keys(labelEls).forEach(function (k) {
       var item = labelEls[k];
       if (!item || !item.fmt) return;
       var el = item.el, f = item.fmt, host = item.host;
-      el.style.display = mkOn.fmt ? 'flex' : 'none';
-      if (!mkOn.fmt) return;
+      if (!mkOn.fmt) { el.style.display = 'none'; return; }
       var hh2 = window.__terrainH ? window.__terrainH(host.x, host.z) : 0;
       _v.set(host.x + f.dx, Math.max(hh2, WL) + 30, host.z + f.dz);
       _v.project(camera);
-      if (_v.z > 1 || _v.x < -1.25 || _v.x > 1.25 || _v.y < -1.25 || _v.y > 1.25) { el.style.display = 'none'; return; }
-      el.style.left = ((_v.x * 0.5 + 0.5) * window.innerWidth) + 'px';
-      el.style.top = ((-_v.y * 0.5 + 0.5) * window.innerHeight) + 'px';
+      if (_v.z > 1 || _v.x < -1.3 || _v.x > 1.3 || _v.y < -1.3 || _v.y > 1.3) { el.style.display = 'none'; return; }
+      cands.push({
+        el: el, prio: 1,
+        sx: (_v.x * 0.5 + 0.5) * w, sy: (-_v.y * 0.5 + 0.5) * h,
+        anchor: 'bottom', opacity: 1, scale: 1
+      });
     });
+    // POI（村庄 3 / 景区地标 2）
     S.pois.forEach(function (p) {
       var el = labelEls[p.id];
       if (!el) return;
-      // 图层控制
       var show = true;
       if (el.dataset.kind === 'vil') show = mkOn.vil;
-      else if (p.type === '景区' || p.type === '文化') show = mkOn.land;
       else show = mkOn.land;
       if (!show) { el.style.display = 'none'; return; }
       var hh = window.__terrainH ? window.__terrainH(p.x, p.z) : 0;
       _v.set(p.x, Math.max(hh, WL) + (p.kind === 'village' ? 26 : 14), p.z);
       _v.project(camera);
-      if (_v.z > 1 || _v.x < -1.25 || _v.x > 1.25 || _v.y < -1.25 || _v.y > 1.25) {
+      if (_v.z > 1 || _v.x < -1.3 || _v.x > 1.3 || _v.y < -1.3 || _v.y > 1.3) {
         el.style.display = 'none';
         return;
       }
-      el.style.display = 'flex';
-      var sx = (_v.x * 0.5 + 0.5) * w, sy = (-_v.y * 0.5 + 0.5) * h;
-      el.style.left = sx + 'px';
-      el.style.top = sy + 'px';
       var fade = p.kind === 'village' ? 1 : clamp((26000 - dist) / 9000, 0.25, 1);
-      el.style.opacity = fade;
       var scale = p.kind === 'village' ? 1 : clamp((26000 - dist) / 11000, 0.6, 1);
-      el.style.transform = 'translate(-50%,-100%) scale(' + scale.toFixed(2) + ')';
+      cands.push({
+        el: el, prio: p.kind === 'village' ? 3 : 2,
+        sx: (_v.x * 0.5 + 0.5) * w, sy: (-_v.y * 0.5 + 0.5) * h,
+        anchor: 'bottom', opacity: fade, scale: scale
+      });
+    });
+
+    // ---------- 排序：优先级高的先占位；同级按距屏幕中心近者优先 ----------
+    cands.sort(function (a, b) {
+      if (b.prio !== a.prio) return b.prio - a.prio;
+      var da = Math.abs(a.sx - w / 2) + Math.abs(a.sy - h / 2);
+      var db = Math.abs(b.sx - w / 2) + Math.abs(b.sy - h / 2);
+      return da - db;
+    });
+
+    // ---------- 贪心放置（含高优先级偏移尝试） ----------
+    var occupied = [];
+    var PAD = 3;
+    cands.forEach(function (c) {
+      var el = c.el;
+      el.style.display = 'flex';
+      el.style.opacity = c.opacity;
+      el.style.transform = 'translate(-50%,-100%) scale(' + c.scale.toFixed(2) + ')';
+      var ew = el.offsetWidth || 60, eh = el.offsetHeight || 22;
+      // 候选偏移位：默认锚点下方；冲突时尝试 下/上/左/右
+      var offsets = [[0, 0], [0, eh + 10], [0, -(eh + 10)], [-ew / 2 - 12, 0], [ew / 2 + 12, 0]];
+      var placed = null;
+      for (var t = 0; t < offsets.length; t++) {
+        // 村庄/地标（prio>=2）才允许偏移寻找位置；徽章只试默认位
+        if (t > 0 && c.prio < 2) break;
+        var ox = c.sx + offsets[t][0], oy = c.sy + offsets[t][1];
+        var rect = [ox - ew / 2 - PAD, oy - eh - PAD, ew + PAD * 2, eh + PAD * 2];
+        var clash = false;
+        for (var i = 0; i < occupied.length; i++) {
+          var q = occupied[i];
+          if (!(rect[0] + rect[2] < q[0] || q[0] + q[2] < rect[0] ||
+                rect[1] + rect[3] < q[1] || q[1] + q[3] < rect[1])) { clash = true; break; }
+        }
+        if (!clash) { placed = { x: ox, y: oy, rect: rect }; break; }
+      }
+      if (!placed) { el.style.display = 'none'; return; }
+      occupied.push(placed.rect);
+      el.style.left = placed.x + 'px';
+      el.style.top = placed.y + 'px';
     });
   }
   var mkOn = { vil: true, land: true, route: true, fmt: true };
@@ -2153,8 +2213,8 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
     html += '<div class="mini" style="margin-top:10px">实拍图来自高德地图开放平台 POI，仅用于位置与风貌参考。</div>';
     card.innerHTML = html;
     card.classList.add('on');
-    // 地图联动
-    panAmap(id);
+    // 小地图联动：飞到对应点位
+    mmFlyToPoi(id);
   }
 
   function findContent(id) {
@@ -2222,157 +2282,287 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
 
   /* （沉浸式漫游模块已按需求移除） */
 
-  /* ================= 高德地图 ================= */
-  var amap = null, amapReady = false, amapMarkers = [], amapBig = false;
-  var AMAP_KEY = window.AMAP_KEY || '';
-  var AMAP_SEC = window.AMAP_SECURITY || '';
+  /* ================= 卫星小地图（自建 · 高德卫星影像） ================= */
+  // 用站点已加载的高德卫星影像（与三维底图同源）绘制，任何设备均可渲染，
+  // 不依赖高德 JS API 的 WebGL 渲染管线（部分设备会白屏）。
+  var MM = {
+    cv: null, ctx: null, img: null, imgOk: false,
+    W: 116.0595703125, S: 35.81781315869663, E: 116.47705078125, N: 36.120127589781454,
+    cx: 116.26, cy: 35.95, zoom: 1,
+    sat: true, big: false,
+    marks: [], drag: null, moved: 0,
+    timer: null
+  };
 
-  var satLayer = null, amapSatOn = true;
-  function initAmap() {
-    var load = function () {
-      if (window.AMap) { buildAmap(); return; }
-      if (!AMAP_KEY) {
-        document.getElementById('amapFallback').style.display = 'flex';
-        document.getElementById('amapFallback').innerHTML = '<div>高德地图未启用<br><span style="font-size:10.5px;color:var(--ink3)">本页为公开版，未内置地图密钥；三维模型部分不受影响。</span></div>';
-        document.getElementById('amapTitle').textContent = '高德地图（未启用）';
-        return;
-      }
-      var s = document.createElement('script');
-      s.src = 'https://webapi.amap.com/maps?v=2.0&key=' + encodeURIComponent(AMAP_KEY) + '&plugin=AMap.Marker,AMap.TileLayer.Satellite,AMap.TileLayer.RoadNet';
-      s.onload = function () { setTimeout(buildAmap, 60); };
-      s.onerror = function () {
-        document.getElementById('amapFallback').style.display = 'flex';
-        document.getElementById('amapFallback').innerHTML = '<div>高德地图未加载<br><span style="font-size:10.5px;color:var(--ink3)">需要联网才能显示在线地图；三维模型部分不受影响。</span></div>';
-      };
-      window._AMapSecurityConfig = { securityJsCode: AMAP_SEC };
-      document.head.appendChild(s);
-    };
-    if (AMAP_KEY) load();
-    else {
-      // 无 key 时也展示兜底
-      document.getElementById('amapFallback').style.display = 'flex';
+  function mmProject(lng, lat) {
+    var cv = MM.cv;
+    var w = cv.clientWidth, h = cv.clientHeight;
+    var vw = (MM.E - MM.W) / MM.zoom, vh = (MM.N - MM.S) / MM.zoom;
+    var x = (lng - (MM.cx - vw / 2)) / vw * w;
+    var y = ((MM.cy + vh / 2) - lat) / vh * h;
+    return [x, y];
+  }
+  function mmUnproject(px, py) {
+    var cv = MM.cv;
+    var w = cv.clientWidth, h = cv.clientHeight;
+    var vw = (MM.E - MM.W) / MM.zoom, vh = (MM.N - MM.S) / MM.zoom;
+    return [MM.cx - vw / 2 + px / w * vw, MM.cy + vh / 2 - py / h * vh];
+  }
+  function mmPoiLngLat(p) {
+    var c = findContent(p.id);
+    if (c && c.lng && c.lat) return [c.lng, c.lat];
+    var O = S.meta.origin;
+    var M_LON = 111320 * Math.cos(O[1] * Math.PI / 180), M_LAT = 110958;
+    return [O[0] + p.x / M_LON, O[1] - p.z / M_LAT];
+  }
+  function mmCamLngLat() {
+    var O = S.meta.origin;
+    var M_LON = 111320 * Math.cos(O[1] * Math.PI / 180), M_LAT = 110958;
+    return [O[0] + cam.target.x / M_LON, O[1] - cam.target.z / M_LAT];
+  }
+  function mmRingLngLat(pt) {
+    var O = S.meta.origin;
+    var M_LON = 111320 * Math.cos(O[1] * Math.PI / 180), M_LAT = 110958;
+    return [O[0] + pt[0] / M_LON, O[1] - pt[1] / M_LAT];
+  }
+
+  function initMiniMap() {
+    MM.cv = document.getElementById('mmap');
+    if (!MM.cv) return;
+    window.__MM = MM;   // 调试/测试接口
+    MM.ctx = MM.cv.getContext('2d');
+    // 卫星图（与三维底图同源：dataURI 或 tex/ 外置路径）
+    var src = window.IMG && window.IMG.sat;
+    if (src) {
+      MM.img = new Image();
+      MM.img.onload = function () { MM.imgOk = true; mmRender(); };
+      MM.img.onerror = function () { MM.imgOk = false; };
+      MM.img.src = src;
     }
-    document.getElementById('amapMode').addEventListener('click', function () {
-      if (!amap) return;
-      try {
-        if (amapSatOn) {
-          if (satLayer) amap.remove(satLayer);
-          this.textContent = '卫星图';
-          amapSatOn = false;
-        } else {
-          satLayer = new AMap.TileLayer.Satellite();
-          amap.add(satLayer);
-          this.textContent = '矢量图';
-          amapSatOn = true;
+    var el = MM.cv;
+    el.addEventListener('pointerdown', function (e) {
+      MM.drag = { x: e.clientX, y: e.clientY, cx: MM.cx, cy: MM.cy };
+      MM.moved = 0;
+      el.setPointerCapture && el.setPointerCapture(e.pointerId);
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (!MM.drag) return;
+      var w = el.clientWidth, h = el.clientHeight;
+      var vw = (MM.E - MM.W) / MM.zoom, vh = (MM.N - MM.S) / MM.zoom;
+      MM.cx = MM.drag.cx - (e.clientX - MM.drag.x) / w * vw;
+      MM.cy = MM.drag.cy + (e.clientY - MM.drag.y) / h * vh;
+      MM.moved += Math.abs(e.clientX - MM.drag.x) + Math.abs(e.clientY - MM.drag.y);
+      mmClamp();
+      mmRender();
+    });
+    el.addEventListener('pointerup', function (e) {
+      MM.drag = null;
+      // 点击（非拖拽）：命中标注 → 卡片+视角；否则三维飞往该点
+      if (MM.moved < 6) {
+        var r = el.getBoundingClientRect();
+        var px = e.clientX - r.left, py = e.clientY - r.top;
+        var hit = null;
+        for (var i = 0; i < MM.marks.length; i++) {
+          var m = MM.marks[i];
+          if (px >= m.x - 5 && px <= m.x + m.w + 5 && py >= m.y - 12 && py <= m.y + 6) { hit = m; break; }
         }
-      } catch (e) { console.warn('[amap] 切换失败', e); }
+        if (hit) { showCard(hit.id); mmFlyToPoi(hit.id); }
+        else {
+          var ll = mmUnproject(px, py);
+          mmFlyTo(ll[0], ll[1], 2600);
+        }
+      }
+    });
+    el.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var r = el.getBoundingClientRect();
+      var px = e.clientX - r.left, py = e.clientY - r.top;
+      var before = mmUnproject(px, py);
+      MM.zoom = Math.max(1, Math.min(6, MM.zoom * (e.deltaY > 0 ? 0.85 : 1.18)));
+      var after = mmUnproject(px, py);
+      MM.cx += before[0] - after[0];
+      MM.cy += before[1] - after[1];
+      mmClamp();
+      mmRender();
+    }, { passive: false });
+    document.getElementById('amapMode').addEventListener('click', function () {
+      MM.sat = !MM.sat;
+      this.textContent = MM.sat ? '矢量图' : '卫星图';
+      mmRender();
     });
     document.getElementById('amapBig').addEventListener('click', toggleBigMap);
     document.getElementById('amapBig2').addEventListener('click', toggleBigMap);
     var ckMapLb = document.getElementById('ckMapLb');
-    ckMapLb.addEventListener('change', function () {
-      amapMarkers.forEach(function (m) { ckMapLb.checked ? m.show() : m.hide(); });
-    });
+    ckMapLb && ckMapLb.addEventListener('change', mmRender);
+    MM.timer = setInterval(mmRender, 160);
+    mmResize();
+    mmRender();
   }
 
-  function buildAmap() {
-    if (amapReady) return;
-    amapReady = true;
-    // 关键：不能用构造函数 layers（会整体替换默认底图图层 → 白图）；
-    // 必须先建默认底图，再 add 卫星栅格层叠加。
-    amap = new AMap.Map('amap', {
-      zoom: 11,
-      center: [116.25, 35.96],
-      mapStyle: 'amap://styles/normal',
-      viewMode: '2D'
-    });
-    try {
-      satLayer = new AMap.TileLayer.Satellite();
-      amap.add(satLayer);
-    } catch (e) {
-      satLayer = null;
-      console.warn('[amap] 卫星层加载失败，保留矢量底图', e);
+  function mmClamp() {
+    var vw = (MM.E - MM.W) / MM.zoom, vh = (MM.N - MM.S) / MM.zoom;
+    MM.cx = Math.max(MM.W + vw / 2, Math.min(MM.E - vw / 2, MM.cx));
+    MM.cy = Math.max(MM.S + vh / 2, Math.min(MM.N - vh / 2, MM.cy));
+  }
+
+  function mmResize() {
+    if (!MM.cv) return;
+    var wrap = document.getElementById('amapWrap');
+    if (MM.big) {
+      // 放大模式：浮层，显式尺寸
+      var bw = Math.min(680, window.innerWidth - 80);
+      var bh = Math.round(bw * 0.72);
+      MM.cv.style.width = bw + 'px';
+      MM.cv.style.height = bh + 'px';
+      wrap.style.height = bh + 'px';
+    } else {
+      // 常规模式：清除行内尺寸，交还 CSS（桌面 224px / 手机 148px），canvas inset:0 自动填充
+      MM.cv.style.width = '';
+      MM.cv.style.height = '';
+      wrap.style.height = '';
     }
-    amap.on('complete', function () { document.getElementById('amapTitle').textContent = '高德卫星影像 · 联动定位'; });
-    buildAmapMarkers();
-  }
-
-  function buildAmapMarkers() {
-    if (!amap) return;
-    amapMarkers.forEach(function (m) { m.setMap(null); });
-    amapMarkers = [];
-    S.pois.forEach(function (p) {
-      var lnglat = null;
-      var c = findContent(p.id);
-      if (c && c.lng && c.lat) lnglat = [c.lng, c.lat];
-      else {
-        // 从本地坐标反算
-        var O = S.meta.origin;
-        var M_LON = 111320 * Math.cos(O[1] * Math.PI / 180), M_LAT = 110958;
-        lnglat = [O[0] + p.x / M_LON, O[1] - p.z / M_LAT];
-      }
-      var mk = new AMap.CircleMarker({
-        center: lnglat, radius: p.kind === 'village' ? 7 : 5,
-        strokeColor: '#fff', strokeWeight: 2,
-        fillColor: p.kind === 'village' ? '#B5843A' : '#0E3D2E', fillOpacity: 1, zIndex: 100
-      });
-      mk.on('click', function () { showCard(p.id); setViewFor(p.id); });
-      mk.setMap(amap);
-      var lb = new AMap.Text({
-        text: p.name, position: lnglat, offset: [8, -4],
-        style: { 'background': 'rgba(246,248,239,.92)', 'border': '1px solid rgba(30,60,45,.3)', 'color': '#1E2E26', 'font-size': '11px', 'padding': '0 5px', 'border-radius': '4px' }
-      });
-      lb.setMap(amap);
-      amapMarkers.push(mk); amapMarkers.push(lb);
-    });
-  }
-
-  function setViewFor(id) {
-    var map = { sangyuan: 'sangyuan', anshan: 'anshan', tangfang: 'tangfang', song_city: 'buya' };
-    if (map[id]) setView(map[id]);
-    else {
-      var p = S.pois.find(function (q) { return q.id === id; });
-      if (p) {
-        var v = poiV(id);
-        cam.tTarget.copy(v);
-        cam.tYaw = 0.6; cam.tPitch = 0.42; cam.tDist = 1600;
-      }
-    }
-  }
-
-  function panAmap(id) {
-    if (!amap) return;
-    var p = S.pois.find(function (q) { return q.id === id; });
-    if (!p) return;
-    var c = findContent(id);
-    if (c && c.lng) { amap.panTo([c.lng, c.lat]); }
-    else {
-      var O = S.meta.origin;
-      var M_LON = 111320 * Math.cos(O[1] * Math.PI / 180), M_LAT = 110958;
-      amap.panTo([O[0] + p.x / M_LON, O[1] - p.z / M_LAT]);
-    }
+    var w = MM.cv.clientWidth, h = MM.cv.clientHeight;
+    if (!w || !h) return;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    MM.cv.width = Math.round(w * dpr);
+    MM.cv.height = Math.round(h * dpr);
+    MM.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    mmRender();
   }
 
   function toggleBigMap() {
-    var wrap = document.getElementById('amapWrap');
-    if (!amapBig) {
-      amapBig = true;
-      wrap.dataset.oldCss = wrap.getAttribute('style') || '';
-      wrap.setAttribute('style', 'position:fixed;left:12vw;top:10vh;width:76vw;height:76vh;z-index:95;border-radius:14px;overflow:hidden;box-shadow:0 20px 70px rgba(0,0,0,.5)');
-      document.body.appendChild(wrap);
-      var close = document.createElement('div');
-      close.textContent = '✕ 收起地图';
-      close.style.cssText = 'position:absolute;right:10px;top:10px;z-index:99;background:rgba(14,61,46,.92);color:#fff;font-size:12px;padding:5px 12px;border-radius:8px;cursor:pointer';
-      wrap.appendChild(close);
-      close.addEventListener('click', function (e) { e.stopPropagation(); toggleBigMap(); });
+    MM.big = !MM.big;
+    document.getElementById('amapWrap').classList.toggle('big', MM.big);
+    mmResize();
+  }
+
+  function mmRender() {
+    var cv = MM.cv;
+    if (!cv || !MM.ctx) return;
+    var ctx = MM.ctx;
+    var w = cv.clientWidth, h = cv.clientHeight;
+    if (!w || !h) return;
+    ctx.clearRect(0, 0, w, h);
+    MM.marks = [];
+    if (MM.sat && MM.imgOk) {
+      // 卫星影像裁剪绘制
+      var iw = MM.img.naturalWidth, ih = MM.img.naturalHeight;
+      var vw = (MM.E - MM.W) / MM.zoom, vh = (MM.N - MM.S) / MM.zoom;
+      var sx = (MM.cx - vw / 2 - MM.W) / (MM.E - MM.W) * iw;
+      var sy = (MM.N - (MM.cy + vh / 2)) / (MM.N - MM.S) * ih;
+      var sw = vw / (MM.E - MM.W) * iw, sh = vh / (MM.N - MM.S) * ih;
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(MM.img, sx, sy, sw, sh, 0, 0, w, h);
     } else {
-      amapBig = false;
-      wrap.setAttribute('style', wrap.dataset.oldCss || '');
-      var side = document.getElementById('side');
-      side.insertBefore(wrap, side.firstChild);
-      wrap.querySelectorAll('div').forEach(function (d) { if (d.textContent.indexOf('收起地图') >= 0 && d.style.position === 'absolute') d.remove(); });
+      // 矢量模式：纸色底 + 水体
+      ctx.fillStyle = '#EDF1E6';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#A9CCE4';
+      ctx.strokeStyle = '#7FA8C8';
+      ctx.lineWidth = 1;
+      S.water.polys.forEach(function (p) {
+        if (p.area_km2 < 0.4) return;
+        ctx.beginPath();
+        for (var i = 0; i < p.ring.length; i++) {
+          var pt = mmProject.apply(null, mmRingLngLat(p.ring[i]));
+          if (i === 0) ctx.moveTo(pt[0], pt[1]); else ctx.lineTo(pt[0], pt[1]);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      });
     }
-    if (amap) setTimeout(function () { amap.resize(); }, 120);
+    // 相机联动框（三维视角位置）
+    var cl = mmCamLngLat();
+    var cp = mmProject(cl[0], cl[1]);
+    var O = S.meta.origin;
+    var M_LON = 111320 * Math.cos(O[1] * Math.PI / 180), M_LAT = 110958;
+    var rM = Math.max(300, cam.dist * 0.42);
+    var p1 = mmProject(cl[0] - rM / M_LON, cl[1] + rM / M_LAT);
+    var p2 = mmProject(cl[0] + rM / M_LON, cl[1] - rM / M_LAT);
+    ctx.strokeStyle = 'rgba(216,172,98,.95)';
+    ctx.lineWidth = 1.6;
+    ctx.strokeRect(Math.min(p1[0], p2[0]), Math.min(p1[1], p2[1]),
+                   Math.abs(p2[0] - p1[0]), Math.abs(p2[1] - p1[1]));
+    ctx.fillStyle = 'rgba(216,172,98,.95)';
+    ctx.beginPath();
+    ctx.arc(cp[0], cp[1], 2.6, 0, 6.29);
+    ctx.fill();
+    // 标注点（标签避让）
+    var showLb = document.getElementById('ckMapLb');
+    var lbOn = !showLb || showLb.checked;
+    var items = [];
+    S.pois.forEach(function (p) {
+      var ll = mmPoiLngLat(p);
+      var pt = mmProject(ll[0], ll[1]);
+      if (pt[0] < -40 || pt[0] > w + 40 || pt[1] < -20 || pt[1] > h + 20) return;
+      items.push({ p: p, x: pt[0], y: pt[1], prio: p.kind === 'village' ? 2 : 1 });
+    });
+    items.sort(function (a, b) {
+      return b.prio - a.prio || Math.abs(a.y - h / 2) - Math.abs(b.y - h / 2);
+    });
+    var placed = [];
+    items.forEach(function (it) {
+      var isVil = it.p.kind === 'village';
+      ctx.beginPath();
+      ctx.arc(it.x, it.y, isVil ? 4.5 : 3.2, 0, 6.29);
+      ctx.fillStyle = isVil ? '#B5843A' : '#0E3D2E';
+      ctx.fill();
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = 'rgba(255,255,255,.9)';
+      ctx.stroke();
+      if (!lbOn) return;
+      var label = it.p.name;
+      ctx.font = (isVil ? 'bold 11px' : '10px') + ' "PingFang SC","Microsoft YaHei",sans-serif';
+      var tw = ctx.measureText(label).width;
+      var lx = it.x + 7, ly = it.y + 3.5;
+      var rect = [lx - 2, ly - 9, tw + 5, 12];
+      var clash = false;
+      for (var i = 0; i < placed.length; i++) {
+        var q = placed[i];
+        if (!(rect[0] + rect[2] < q[0] || q[0] + q[2] < rect[0] ||
+              rect[1] + rect[3] < q[1] || q[1] + q[3] < rect[1])) { clash = true; break; }
+      }
+      if (clash) return;
+      placed.push(rect);
+      ctx.fillStyle = 'rgba(246,248,239,.92)';
+      ctx.strokeStyle = 'rgba(30,60,45,.28)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(rect[0], rect[1], rect[2], rect[3], 3);
+      else ctx.rect(rect[0], rect[1], rect[2], rect[3]);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#1E2E26';
+      ctx.fillText(label, lx, ly);
+      MM.marks.push({ id: it.p.id, x: it.x, y: it.y - 8, w: rect[2] });
+    });
+    // 比例尺
+    var vw2 = (MM.E - MM.W) / MM.zoom;
+    var kmPerDeg = 111.32 * Math.cos(MM.cy * Math.PI / 180);
+    var barKm = vw2 * kmPerDeg / 4;
+    var barPx = w / 4;
+    ctx.fillStyle = 'rgba(255,255,255,.75)';
+    ctx.fillRect(6, h - 16, barPx, 3);
+    ctx.fillStyle = 'rgba(30,46,38,.85)';
+    ctx.font = '9px sans-serif';
+    ctx.fillText(barKm >= 1 ? Math.round(barKm) + ' km' : Math.round(barKm * 1000) + ' m', 6, h - 20);
+  }
+
+  function mmFlyTo(lng, lat, dist) {
+    var O = S.meta.origin;
+    var M_LON = 111320 * Math.cos(O[1] * Math.PI / 180), M_LAT = 110958;
+    cam.tTarget.set((lng - O[0]) * M_LON, 0, (O[1] - lat) * M_LAT);
+    cam.tDist = dist || 2600;
+    cam.tPitch = 0.42;
+    cam.userTouched = true;
+  }
+
+  function mmFlyToPoi(id) {
+    var p = S.pois.find(function (q) { return q.id === id; });
+    if (!p) return;
+    var ll = mmPoiLngLat(p);
+    mmFlyTo(ll[0], ll[1], p.kind === 'village' ? 1250 : 1800);
   }
 
   /* ================= 手机端 ================= */
@@ -2381,11 +2571,15 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
     var auto = window.innerWidth < 780 || /Mobi|Android|iPhone/i.test(navigator.userAgent);
     if (auto) document.documentElement.classList.add('m');
     updateModeBtn();
-    document.getElementById('bMode').addEventListener('click', function () {
+    var toggleMode = function () {
       document.documentElement.classList.toggle('m');
       updateModeBtn();
       window.dispatchEvent(new Event('resize'));
-    });
+      mmResize && mmResize();
+    };
+    document.getElementById('bMode').addEventListener('click', toggleMode);
+    var bMode2 = document.getElementById('bMode2');
+    bMode2 && bMode2.addEventListener('click', toggleMode);
   }
   function updateModeBtn() {
     document.getElementById('bModeTxt').textContent = isMobile() ? '电脑端' : '手机端';
@@ -2404,7 +2598,7 @@ window.PHOTOS={"sangyuan":["photos/sangyuan_0.jpg","photos/sangyuan_1.jpg","phot
         '<h4>一、范围与坐标</h4>' +
         '<p>范围覆盖东平湖老湖区（常年蓄水 209 km²）及三个重点村：桑园村（戴庙镇）、安山古镇（商老庄乡）、塘坊村（东平街道），东西约 ' + (S2.meta.size_m[0] / 1000).toFixed(1) + ' km、南北约 ' + (S2.meta.size_m[1] / 1000).toFixed(1) + ' km。全流程统一采用 <b>GCJ-02</b> 坐标系，与高德底图同源。</p>' +
         '<h4>二、底图</h4>' +
-        '<p>地面为<b>高德卫星影像</b>两级铺贴：全域缩放级别 14（约 7.7 米/像素），桑园村、安山古镇、塘坊村、大宋不夜城四处用缩放级别 16 高清影像（约 1.9 米/像素）作重点呈现。右侧高德面板默认显示卫星影像，可一键切回矢量地图。</p>' +
+        '<p>地面为<b>高德卫星影像</b>多级铺贴：全域缩放级别 14（约 7.7 米/像素），桑园村、安山古镇、塘坊村、大宋不夜城四处用缩放级别 16 高清影像（约 1.9 米/像素）作重点呈现。右上角卫星小地图与三维场景同源（高德卫星影像），支持拖拽、滚轮缩放，点击标注或地图任意位置可联动三维视角，也可一键切到矢量样式。</p>' +
         '<h4>三、三维几何</h4>' +
         '<p><b>共 ' + nB + ' 栋建筑体块</b>：位于四个重点区，按高德影像中的村落肌理与建筑分布提取轮廓、程序化复原，<b>不代表具体某一栋房屋</b>；湖岸线按高德矢量数据提取，地貌按公开地形数据（DEM）复原；<b>' + nT + ' 棵树、渔船为示意布置</b>。</p>' +
         '<h4>四、村落介绍与实拍图</h4>' +
