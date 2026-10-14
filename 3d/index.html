@@ -503,6 +503,30 @@ window.PHOTOS={"sangyuan":["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2
     var ORIGIN_LNG = META.origin[0], ORIGIN_LAT = META.origin[1];
     var M_LON = 111320 * Math.cos(ORIGIN_LAT * Math.PI / 180);
     var M_LAT = 110958;
+    // 水体多边形索引（用于精确判定"贴片顶点是否在水上"）
+    var wRings = S.water.polys.filter(function (p) { return p.area_km2 >= 0.3; }).map(function (p) {
+      var ring = p.ring, minx = 1e9, maxx = -1e9, minz = 1e9, maxz = -1e9;
+      for (var k = 0; k < ring.length; k++) {
+        if (ring[k][0] < minx) minx = ring[k][0];
+        if (ring[k][0] > maxx) maxx = ring[k][0];
+        if (ring[k][1] < minz) minz = ring[k][1];
+        if (ring[k][1] > maxz) maxz = ring[k][1];
+      }
+      return { ring: ring, bbox: [minx, minz, maxx, maxz] };
+    });
+    function inWater(x, z) {
+      for (var w = 0; w < wRings.length; w++) {
+        var wr = wRings[w], bb = wr.bbox;
+        if (x < bb[0] || x > bb[2] || z < bb[1] || z > bb[3]) continue;
+        var ring = wr.ring, inside = false;
+        for (var a = 0, b2 = ring.length - 1; a < ring.length; b2 = a++) {
+          var xi = ring[a][0], zi = ring[a][1], xj = ring[b2][0], zj = ring[b2][1];
+          if (((zi > z) !== (zj > z)) && (x < (xj - xi) * (z - zi) / (zj - zi) + xi)) inside = !inside;
+        }
+        if (inside) return true;
+      }
+      return false;
+    }
     for (var i = 0; i < tiles.length; i++) {
       var tk = tiles[i], key = tk[0];
       var img = window.IMG[key];
@@ -518,6 +542,7 @@ window.PHOTOS={"sangyuan":["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2
       var ppos = geo.attributes.position;
       for (var vi = 0; vi < ppos.count; vi++) {
         var vx = cx + ppos.getX(vi), vz = cz + ppos.getZ(vi);
+        if (inWater(vx, vz)) { ppos.setY(vi, WL - 0.6); continue; }
         var th = terrainH(vx, vz);
         if (th > WL + 0.15) ppos.setY(vi, th + lift);
         else ppos.setY(vi, WL - 0.6);
@@ -539,6 +564,7 @@ window.PHOTOS={"sangyuan":["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2
       })());
       mesh.position.set(cx, 0, cz);
       mesh.receiveShadow = true;
+      mesh.renderOrder = 1;   // 排在水面（2）之前，确保沉水部分被水面正确覆盖
       scene.add(mesh);
       localTiles.push(mesh);
     }
@@ -616,7 +642,7 @@ window.PHOTOS={"sangyuan":["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2
         '  float spec = pow(max(dot(R, V), 0.0), 60.0);',
         '  col += vec3(1.0, 0.95, 0.82) * spec * (1.0 - uNight) * (0.14 + 0.4*dfade);',
         '  col *= (1.0 - uNight*0.68);',
-        '  gl_FragColor = vec4(col, 0.97);',
+        '  gl_FragColor = vec4(col, 0.9);',
         '}'
       ].join('\n')
     });
